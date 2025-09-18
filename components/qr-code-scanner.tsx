@@ -9,10 +9,10 @@ import {
   Dimensions,
 } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/lib/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { Button } from '@/components/ui/button';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Button } from '@/components/design-system/button';
+import { IconSymbol } from '@/components/design-system/icon-symbol';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');

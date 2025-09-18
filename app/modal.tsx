@@ -17,13 +17,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Card, CardContent, CardHeader } from '@/components/design-system/card';
+import { Button } from '@/components/design-system/button';
+import { Input } from '@/components/design-system/input';
+import { IconSymbol } from '@/components/design-system/icon-symbol';
 import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useApp } from '@/contexts/app-context';
+import { useColorScheme } from '@/lib/use-color-scheme';
+import { useApp } from '@/lib/app-context';
 
 export default function SettingsScreen() {
   const router = useRouter();

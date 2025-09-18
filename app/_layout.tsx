@@ -1,12 +1,12 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from 'react-native';
 import 'react-native-reanimated';
 
-// import { useColorScheme } from '@/hooks/use-color-scheme'; // Removed for forced dark mode
-import { AppProvider, useApp } from '@/contexts/app-context';
+import { AppProvider, useApp } from '@/lib/app-context';
+import { ThemeProvider, useTheme } from '@/lib/useTheme';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -15,6 +15,7 @@ function RootLayoutNav() {
   const { state } = useApp();
   const segments = useSegments();
   const router = useRouter();
+  const { theme } = useTheme();
 
   useEffect(() => {
     const inAuthGroup = segments[0] === '(tabs)';
@@ -29,7 +30,12 @@ function RootLayoutNav() {
   }, [state.userRole, segments]);
 
   return (
-    <Stack>
+    <Stack screenOptions={{
+      headerStyle: {
+        backgroundColor: theme.colors.card,
+      },
+      headerTintColor: theme.colors.text,
+    }}>
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
@@ -38,18 +44,27 @@ function RootLayoutNav() {
   );
 }
 
-export default function RootLayout() {
-  const colorScheme = 'dark'; // Force dark mode
+function ThemedRootLayout() {
+    const { colorScheme } = useTheme();
+    const navigationTheme = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
 
+    return (
+        <NavigationThemeProvider value={navigationTheme}>
+            <RootLayoutNav />
+            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+        </NavigationThemeProvider>
+    )
+}
+
+export default function RootLayout() {
   useEffect(() => {
     SplashScreen.hideAsync();
   }, []);
 
   return (
     <AppProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <RootLayoutNav />
-        <StatusBar style="auto" />
+      <ThemeProvider>
+        <ThemedRootLayout />
       </ThemeProvider>
     </AppProvider>
   );

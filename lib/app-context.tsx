@@ -22,6 +22,7 @@ interface AppState {
   hostId?: string;
   deviceName?: string;
   isSharing: boolean;
+  isCameraOpen: boolean;
 }
 
 interface AppContextType {
@@ -33,6 +34,8 @@ interface AppContextType {
   setCurrentConnection: (connection?: Connection) => void;
   toggleSharing: () => void;
   generateHostId: () => string;
+  openCamera: () => void;
+  closeCamera: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -50,6 +53,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     hostId: undefined,
     deviceName: 'My Device',
     isSharing: false,
+    isCameraOpen: false,
   });
 
   // Load persisted data on app start
@@ -132,6 +136,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState(prev => ({ ...prev, isSharing: !prev.isSharing }));
   };
 
+  const openCamera = () => {
+    setState(prev => ({ ...prev, isCameraOpen: true }));
+  };
+
+  const closeCamera = () => {
+    setState(prev => ({ ...prev, isCameraOpen: false }));
+  };
+
   const generateHostId = (): string => {
     // Generate a human-readable host ID
     const adjectives = ['Swift', 'Secure', 'Fast', 'Reliable', 'Strong', 'Quick'];
@@ -153,6 +165,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setCurrentConnection,
     toggleSharing,
     generateHostId,
+    openCamera,
+    closeCamera,
   };
 
   return (

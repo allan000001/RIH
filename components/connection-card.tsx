@@ -12,7 +12,7 @@ import { StatusIndicator, ConnectionStatus } from './ui/status-indicator';
 import { Button } from './ui/button';
 import { IconSymbol } from './ui/icon-symbol';
 import { Colors, Fonts } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/lib/use-color-scheme';
 
 interface ConnectionData {
   id: string;

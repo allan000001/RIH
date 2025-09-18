@@ -29,9 +29,10 @@
 ---
 
 ## Navigation
-**Bottom Navigation Bar (Role-Specific):**
-- **Host:** Home, Connections, Notifications, Settings
-- **Connector:** Home, Connect, Notifications, Settings
+**Bottom Navigation Bar (3-Tab Structure):**
+- **Home:** Main dashboard for both Host and Connector.
+- **Connect:** Contextual hub. For Hosts, it's for managing connections. For Connectors, it's for finding a host.
+- **Notifications:** Activity feed.
 
 **Top Bar / App Bar:**
 - Dynamic per screen, with primary action button (e.g., "Share Internet", "Reconnect", "Approve All").
@@ -54,15 +55,14 @@
 
 ---
 
-### Connections (Host Only)
+### Connect (Host & Connector)
+**Host View:**
 - Device list -> staggered fade-in animation
 - Approve/Reject -> swipe gestures (right = approve, left = reject) + visual cues
 - Undo action -> snackbar: "Rejected. Undo?"
 - Empty state -> "Nobody connected. Share your code to invite."
 
----
-
-### Connect (Connector Only)
+**Connector View:**
 - Top bar -> "Find a Host" + QR scan shortcut
 - Input field + recent hosts (chips with slide-in animation)
 - Connecting -> animated ring / progress indicator

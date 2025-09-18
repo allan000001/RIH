@@ -5,30 +5,33 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
-  Alert,
-  Dimensions,
   TouchableOpacity,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { 
   FadeIn, 
   SlideInDown, 
-  SlideInRight,
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
-  withSequence,
   withTiming,
+  withSequence,
   runOnJS,
+  Layout,
+  FadeOut,
 } from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-// import { useColorScheme } from '@/hooks/use-color-scheme'; // Removed for forced dark mode
-import { useApp } from '@/contexts/app-context';
+import { Button } from '@/components/design-system/button';
+import { Card, CardContent } from '@/components/design-system/card';
+import { IconSymbol } from '@/components/design-system/icon-symbol';
+import { useTheme } from '@/lib/useTheme';
+import { useApp } from '@/lib/app-context';
+import { Theme } from '@/constants/theme';
+import { api } from '@/services/api';
 
+/**
+ * @interface Notification
+ * @description Represents a notification item.
+ */
 interface Notification {
   id: string;
   type: 'connection_request' | 'connection_approved' | 'connection_denied' | 'data_usage' | 'system' | 'achievement' | 'milestone';
@@ -44,73 +47,33 @@ interface Notification {
   };
 }
 
+/**
+ * NotificationsScreen
+ * @description This screen displays a list of notifications for the user.
+ */
 export default function NotificationsScreen() {
-  const colorScheme = 'dark'; // Force dark mode
+  const { theme, colorScheme } = useTheme();
+  const styles = getStyles(theme);
   const { state } = useApp();
-  const colors = Colors.dark;
-  const roleColors = state.userRole ? Colors[state.userRole].dark : colors;
   const [refreshing, setRefreshing] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'connection_request',
-      title: 'New Connection Request',
-      message: 'John\'s iPhone wants to connect to your network',
-      timestamp: new Date(Date.now() - 300000), // 5 minutes ago
-      read: false,
-      actionable: true,
-      priority: 'high',
-    },
-    {
-      id: '2',
-      type: 'achievement',
-      title: '🎉 Achievement Unlocked!',
-      message: 'Data Sharer - You\'ve shared 10GB of data this month',
-      timestamp: new Date(Date.now() - 600000), // 10 minutes ago
-      read: false,
-      priority: 'medium',
-      reward: {
-        type: 'badge',
-        value: 'Data Sharer',
-      },
-    },
-    {
-      id: '3',
-      type: 'milestone',
-      title: '🔥 Streak Milestone!',
-      message: '7-day sharing streak! Keep it up for bonus rewards',
-      timestamp: new Date(Date.now() - 1800000), // 30 minutes ago
-      read: false,
-      priority: 'medium',
-      reward: {
-        type: 'streak',
-        value: 7,
-      },
-    },
-    {
-      id: '4',
-      type: 'data_usage',
-      title: 'High Data Usage Alert',
-      message: 'Sarah\'s MacBook has used 500MB in the last hour',
-      timestamp: new Date(Date.now() - 3600000), // 1 hour ago
-      read: false,
-      actionable: true,
-      priority: 'medium',
-    },
-    {
-      id: '5',
-      type: 'connection_approved',
-      title: 'Connection Approved',
-      message: 'You are now connected to SwiftLink123',
-      timestamp: new Date(Date.now() - 7200000), // 2 hours ago
-      read: true,
-      priority: 'low',
-    },
-  ]);
+  const [loading, setLoading] = useState(true);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    setLoading(true);
+    const fetchedNotifications = await api.getNotifications();
+    setNotifications(fetchedNotifications);
+    setLoading(false);
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
+    await fetchNotifications();
+    setRefreshing(false);
   };
 
   const getNotificationIcon = (type: Notification['type']) => {
@@ -137,34 +100,21 @@ export default function NotificationsScreen() {
   const getNotificationColor = (type: Notification['type']) => {
     switch (type) {
       case 'connection_request':
-        return colors.warning;
+        return theme.colors.warning;
       case 'connection_approved':
-        return colors.success;
+        return theme.colors.success;
       case 'connection_denied':
-        return colors.error;
+        return theme.colors.error;
       case 'data_usage':
-        return colors.progress;
+        return theme.colors.progress;
       case 'system':
-        return colors.neutral;
+        return theme.colors.textSecondary;
       case 'achievement':
-        return '#FFD700'; // Gold for achievements
+        return theme.colors.badge;
       case 'milestone':
-        return '#FF6B35'; // Orange for milestones
+        return '#FF6B35'; // Custom color
       default:
-        return colors.tint;
-    }
-  };
-
-  const getPriorityColor = (priority?: Notification['priority']) => {
-    switch (priority) {
-      case 'high':
-        return colors.error;
-      case 'medium':
-        return colors.warning;
-      case 'low':
-        return colors.success;
-      default:
-        return colors.neutral;
+        return theme.colors.primary;
     }
   };
 
@@ -183,52 +133,43 @@ export default function NotificationsScreen() {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  // Action handlers
-  const handleApproveConnection = (notificationId: string) => {
-    setNotifications(prev => prev.map(n => 
-      n.id === notificationId ? { ...n, read: true } : n
-    ));
-    // Handle connection approval logic
-  };
-
-  const handleRejectConnection = (notificationId: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== notificationId));
-    // Handle connection rejection logic
-  };
-
   const handleMarkAsRead = (notificationId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setNotifications(prev => prev.map(n => 
       n.id === notificationId ? { ...n, read: true } : n
     ));
   };
 
-  const handleClaimReward = (notificationId: string) => {
-    setNotifications(prev => prev.map(n => 
-      n.id === notificationId ? { ...n, read: true } : n
-    ));
-    // Handle reward claiming logic
+  const handleMarkAllRead = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+
+  const handleClearAll = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setNotifications([]);
+  };
+
+  const handleAddNewNotification = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    const newNotification: Notification = {
+      id: Date.now().toString(),
+      type: 'system',
+      title: 'New System Notification',
+      message: 'This is a new notification added for testing purposes.',
+      timestamp: new Date(),
+      read: false,
+      priority: 'medium',
+    };
+    setNotifications(prev => [newNotification, ...prev]);
   };
 
   // Enhanced Notification Card Component
-  const NotificationCard = ({ notification, index }: { notification: Notification; index: number }) => {
+  const NotificationCard = ({ notification }: { notification: Notification }) => {
     const scaleAnimation = useSharedValue(1);
-    const glowAnimation = useSharedValue(0);
-
-    useEffect(() => {
-      if (notification.type === 'achievement' || notification.type === 'milestone') {
-        glowAnimation.value = withSequence(
-          withTiming(1, { duration: 800 }),
-          withTiming(0, { duration: 800 })
-        );
-      }
-    }, []);
 
     const cardStyle = useAnimatedStyle(() => ({
       transform: [{ scale: scaleAnimation.value }],
-    }));
-
-    const glowStyle = useAnimatedStyle(() => ({
-      opacity: glowAnimation.value * 0.3,
     }));
 
     const handlePress = () => {
@@ -243,26 +184,14 @@ export default function NotificationsScreen() {
     };
 
     return (
-      <Animated.View style={cardStyle}>
-        {/* Glow effect for achievements */}
-        {(notification.type === 'achievement' || notification.type === 'milestone') && (
-          <Animated.View style={[styles.glowEffect, glowStyle]} />
-        )}
-        
+      <Animated.View layout={Layout.springify()} exiting={FadeOut}>
         <TouchableOpacity onPress={handlePress} activeOpacity={0.9}>
           <Card
             variant={notification.read ? 'default' : 'elevated'}
             style={[
               styles.notificationCard,
               notification.read && { opacity: 0.7 },
-              notification.priority === 'high' && {
-                borderLeftWidth: 4,
-                borderLeftColor: roleColors?.primary || colors.primary,
-              },
-              notification.priority === 'low' && { marginBottom: 8 },
-              notification.type === 'achievement' && styles.achievementCard,
-              notification.type === 'milestone' && styles.milestoneCard,
-            ] as any}
+            ]}
           >
             <CardContent>
               <View style={styles.notificationContent}>
@@ -278,122 +207,15 @@ export default function NotificationsScreen() {
                 </View>
                 
                 <View style={styles.notificationText}>
-                  <View style={styles.notificationHeader}>
-                    <Text style={[
-                      styles.notificationTitle,
-                      { color: colors.text },
-                      !notification.read && { fontWeight: '600' }
-                    ]}>
-                      {notification.title}
-                    </Text>
-                    {notification.priority && (
-                      <View style={[
-                        styles.priorityBadge,
-                        { backgroundColor: getPriorityColor(notification.priority) }
-                      ]}>
-                        <Text style={styles.priorityText}>
-                          {notification.priority.toUpperCase()}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                  
-                  <Text style={[styles.notificationMessage, { color: colors.neutral }]}>
-                    {notification.message}
-                  </Text>
-                  
-                  {notification.reward && (
-                    <View style={styles.rewardContainer}>
-                      <IconSymbol 
-                        name={notification.reward.type === 'badge' ? 'star.fill' as any : 
-                              notification.reward.type === 'streak' ? 'flame.fill' as any : 
-                              'plus.circle.fill' as any} 
-                        size={16} 
-                        color={getNotificationColor(notification.type)} 
-                      />
-                      <Text style={[styles.rewardText, { color: getNotificationColor(notification.type) }]}>
-                        {notification.reward.type === 'badge' ? `Badge: ${notification.reward.value}` :
-                         notification.reward.type === 'streak' ? `${notification.reward.value} Day Streak` :
-                         `+${notification.reward.value} Points`}
-                      </Text>
-                    </View>
-                  )}
-                  
-                  <Text style={[styles.notificationTime, { color: colors.neutral }]}>
-                    {formatTimestamp(notification.timestamp)}
-                  </Text>
+                  <Text style={styles.notificationTitle}>{notification.title}</Text>
+                  <Text style={styles.notificationMessage}>{notification.message}</Text>
+                  <Text style={styles.notificationTime}>{formatTimestamp(notification.timestamp)}</Text>
                 </View>
                 
                 {!notification.read && (
-                  <View style={[styles.unreadDot, { backgroundColor: roleColors?.primary || colors.tint }]} />
+                  <View style={[styles.unreadDot, { backgroundColor: theme.colors.primary }]} />
                 )}
               </View>
-
-              {/* Action buttons for actionable notifications */}
-              {notification.actionable && !notification.read && (
-                <View style={styles.actionButtons}>
-                  {notification.type === 'connection_request' && (
-                    <>
-                      <Button
-                        title="Approve"
-                        variant="primary"
-                        size="small"
-                        onPress={() => {
-                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                        }}
-                        style={styles.actionButton}
-                      />
-                      <Button
-                        title="Reject"
-                        variant="outline"
-                        size="small"
-                        onPress={() => {
-                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-                        }}
-                        style={styles.actionButton}
-                      />
-                    </>
-                  )}
-                  
-                  {notification.type === 'data_usage' && (
-                    <>
-                      <Button
-                        title="View Details"
-                        variant="outline"
-                        size="small"
-                        onPress={() => {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        }}
-                        style={styles.actionButton}
-                      />
-                      <Button
-                        title="Set Limit"
-                        variant="primary"
-                        size="small"
-                        onPress={() => {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                        }}
-                        style={styles.actionButton}
-                      />
-                    </>
-                  )}
-                </View>
-              )}
-
-              {/* Claim reward button for achievements */}
-              {notification.reward && !notification.read && (
-                <View style={styles.actionButtons}>
-                  <Button
-                    title="Claim Reward"
-                    variant="primary"
-                    size="small"
-                    onPress={() => {
-                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                    }}
-                    style={styles.actionButton}
-                  />
-                </View>
-              )}
             </CardContent>
           </Card>
         </TouchableOpacity>
@@ -402,7 +224,7 @@ export default function NotificationsScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={styles.container}>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       
       <ScrollView
@@ -414,52 +236,59 @@ export default function NotificationsScreen() {
         {/* Header */}
         <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
           <View style={styles.headerContent}>
-            <Text style={[styles.title, { color: roleColors?.primary || colors.tint }]}>
-              Activity
-            </Text>
+            <Text style={styles.title}>Activity</Text>
             {unreadCount > 0 && (
-              <View style={[styles.unreadBadge, { backgroundColor: colors.error }]}>
+              <View style={styles.unreadBadge}>
                 <Text style={styles.unreadText}>{unreadCount}</Text>
               </View>
             )}
           </View>
           
-          {notifications.length > 0 && (
+          <View style={styles.headerActions}>
+            <Button
+              title="Add"
+              variant="ghost"
+              size="small"
+              onPress={handleAddNewNotification}
+            />
             <Button
               title="Mark All Read"
               variant="ghost"
               size="small"
-              onPress={() => {/* Mark all as read */}}
+              onPress={handleMarkAllRead}
             />
-          )}
+            {notifications.length > 0 && (
+              <Button
+                title="Clear All"
+                variant="ghost"
+                size="small"
+                onPress={handleClearAll}
+              />
+            )}
+          </View>
         </Animated.View>
 
         {/* Notifications List */}
-        {notifications.length === 0 ? (
+        {loading ? (
+            Array.from({ length: 5 }).map((_, index) => (
+                <View key={index} style={styles.skeletonCard} />
+            ))
+        ) : notifications.length === 0 ? (
           <Animated.View entering={SlideInDown.delay(200)} style={styles.emptyState}>
-            <Card variant="surface" role={state.userRole || 'neutral'}>
+            <Card variant="default">
               <CardContent>
                 <View style={styles.emptyContent}>
-                  <IconSymbol name="bell" size={64} color={colors.neutral} />
-                  <Text style={[styles.emptyTitle, { color: colors.text }]}>
-                    You're All Caught Up!
-                  </Text>
-                  <Text style={[styles.emptySubtitle, { color: colors.neutral }]}>
-                    No new notifications at the moment
-                  </Text>
+                  <IconSymbol name="bell" size={64} color={theme.colors.textSecondary} />
+                  <Text style={styles.emptyTitle}>You're All Caught Up!</Text>
+                  <Text style={styles.emptySubtitle}>No new notifications at the moment</Text>
                 </View>
               </CardContent>
             </Card>
           </Animated.View>
         ) : (
           <View style={styles.notificationsList}>
-            {notifications.map((notification, index) => (
-              <Animated.View
-                key={notification.id}
-                entering={SlideInDown.delay(200 + index * 100)}
-              >
-                <NotificationCard notification={notification} index={index} />
-              </Animated.View>
+            {notifications.map((notification) => (
+              <NotificationCard key={notification.id} notification={notification} />
             ))}
           </View>
         )}
@@ -468,78 +297,86 @@ export default function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 100,
+    paddingHorizontal: theme.spacing[5],
+    paddingTop: theme.spacing[12],
+    paddingBottom: theme.spacing[16],
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: theme.spacing[6],
   },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: theme.fontSizes['3xl'],
+    fontWeight: theme.fontWeights.bold,
+    color: theme.colors.primary,
   },
   unreadBadge: {
-    marginLeft: 12,
-    paddingHorizontal: 8,
+    marginLeft: theme.spacing[3],
+    backgroundColor: theme.colors.error,
+    paddingHorizontal: theme.spacing[2],
     paddingVertical: 2,
-    borderRadius: 12,
+    borderRadius: theme.radii.full,
     minWidth: 20,
     alignItems: 'center',
   },
   unreadText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
+    color: theme.colors.primaryContrast,
+    fontSize: theme.fontSizes.xs,
+    fontWeight: theme.fontWeights.semibold,
   },
   emptyState: {
-    marginTop: 60,
+    marginTop: theme.spacing[12],
   },
   emptyContent: {
     alignItems: 'center',
-    paddingVertical: 40,
+    paddingVertical: theme.spacing[10],
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginTop: 20,
-    marginBottom: 8,
+    fontSize: theme.fontSizes.xl,
+    fontWeight: theme.fontWeights.semibold,
+    marginTop: theme.spacing[5],
+    marginBottom: theme.spacing[2],
+    color: theme.colors.text,
   },
   emptySubtitle: {
-    fontSize: 16,
-    fontWeight: '400',
+    fontSize: theme.fontSizes.md,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
   },
   notificationsList: {
-    gap: 12,
+    gap: theme.spacing[3],
   },
   notificationCard: {
-    marginBottom: 4,
+    marginBottom: theme.spacing[1],
   },
   notificationContent: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: theme.spacing[3],
   },
   notificationIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: theme.radii.full,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -547,90 +384,31 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   notificationTitle: {
-    fontSize: 16,
-    fontWeight: '400',
-    marginBottom: 4,
+    fontSize: theme.fontSizes.md,
+    fontWeight: theme.fontWeights.semibold,
+    marginBottom: theme.spacing[1],
+    color: theme.colors.text,
   },
   notificationMessage: {
-    fontSize: 14,
-    fontWeight: '400',
-    lineHeight: 20,
-    marginBottom: 4,
+    fontSize: theme.fontSizes.sm,
+    lineHeight: theme.lineHeights.loose,
+    marginBottom: theme.spacing[1],
+    color: theme.colors.textSecondary,
   },
   notificationTime: {
-    fontSize: 12,
-    fontWeight: '400',
+    fontSize: theme.fontSizes.xs,
+    color: theme.colors.textSecondary,
   },
   unreadDot: {
     width: 8,
     height: 8,
-    borderRadius: 4,
-    marginTop: 4,
+    borderRadius: theme.radii.full,
+    marginTop: theme.spacing[1],
   },
-  // Enhanced notification styles
-  notificationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 4,
-  },
-  priorityBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-    marginLeft: 8,
-  },
-  priorityText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  rewardContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 8,
-    marginBottom: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
-    borderRadius: 12,
-  },
-  rewardText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 12,
-    justifyContent: 'flex-end',
-  },
-  actionButton: {
-    minWidth: 80,
-  },
-  claimButton: {
-    backgroundColor: '#FFD700',
-    borderColor: '#FFD700',
-  },
-  glowEffect: {
-    position: 'absolute',
-    top: -4,
-    left: -4,
-    right: -4,
-    bottom: -4,
-    backgroundColor: '#FFD700',
-    borderRadius: 16,
-    zIndex: -1,
-  },
-  achievementCard: {
-    borderWidth: 2,
-    borderColor: '#FFD700',
-    backgroundColor: 'rgba(255, 215, 0, 0.05)',
-  },
-  milestoneCard: {
-    borderWidth: 2,
-    borderColor: '#FF6B35',
-    backgroundColor: 'rgba(255, 107, 53, 0.05)',
-  },
+  skeletonCard: {
+      height: 100,
+      backgroundColor: theme.colors.card,
+      borderRadius: theme.radii.lg,
+      marginBottom: theme.spacing[3],
+  }
 });

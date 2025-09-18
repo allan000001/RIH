@@ -16,7 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { IconSymbol } from './icon-symbol';
 import { Colors, Fonts } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/lib/use-color-scheme';
 
 export type InputVariant = 'default' | 'outlined' | 'filled';
 export type InputSize = 'small' | 'medium' | 'large';
