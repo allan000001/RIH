@@ -16,9 +16,9 @@ import Animated, {
   interpolate,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/lib/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { IconSymbol } from '@/components/design-system/icon-symbol';
 
 interface GamifiedMessageProps {
   type: 'success' | 'achievement' | 'milestone' | 'reward' | 'info' | 'warning';

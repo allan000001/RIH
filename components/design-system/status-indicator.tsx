@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { IconSymbol } from './icon-symbol';
 import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/lib/use-color-scheme';
 
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected' | 'error';
 export type StatusSize = 'small' | 'medium' | 'large';

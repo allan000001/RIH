@@ -7,17 +7,16 @@ import Animated, {
   withSequence,
   withTiming,
   withDelay,
-  runOnJS,
 } from 'react-native-reanimated';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { IconSymbol } from '@/components/design-system/icon-symbol';
+import { useTheme } from '@/lib/useTheme';
+import { Theme } from '@/constants/theme';
 
 export interface Badge {
   id: string;
   name: string;
   description: string;
-  icon: string;
+  icon: any;
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   unlockedAt?: Date;
   progress?: number;
@@ -32,12 +31,11 @@ interface BadgeSystemProps {
 interface BadgeCardProps {
   badge: Badge;
   index: number;
-  onUnlock?: () => void;
 }
 
-const BadgeCard: React.FC<BadgeCardProps> = ({ badge, index, onUnlock }) => {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+const BadgeCard: React.FC<BadgeCardProps> = ({ badge, index }) => {
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
   
   const scale = useSharedValue(0);
   const glow = useSharedValue(0);
@@ -76,11 +74,11 @@ const BadgeCard: React.FC<BadgeCardProps> = ({ badge, index, onUnlock }) => {
 
   const getRarityColor = (rarity: Badge['rarity']) => {
     switch (rarity) {
-      case 'common': return '#10B981';
-      case 'rare': return '#3B82F6';
-      case 'epic': return '#8B5CF6';
-      case 'legendary': return '#F59E0B';
-      default: return colors.tabIconDefault;
+      case 'common': return theme.colors.success;
+      case 'rare': return theme.colors.primary;
+      case 'epic': return theme.colors.badge;
+      case 'legendary': return theme.colors.warning;
+      default: return theme.colors.textSecondary;
     }
   };
 
@@ -105,7 +103,6 @@ const BadgeCard: React.FC<BadgeCardProps> = ({ badge, index, onUnlock }) => {
 
   return (
     <Animated.View style={[styles.badgeCard, cardAnimatedStyle]}>
-      {/* Glow effect for unlocked badges */}
       {isUnlocked && (
         <Animated.View
           style={[
@@ -116,7 +113,6 @@ const BadgeCard: React.FC<BadgeCardProps> = ({ badge, index, onUnlock }) => {
         />
       )}
       
-      {/* Sparkle effect */}
       {isUnlocked && (
         <Animated.View style={[styles.sparkleContainer, sparkleAnimatedStyle]}>
           <IconSymbol name="sparkles" size={20} color={rarityColor} />
@@ -126,42 +122,39 @@ const BadgeCard: React.FC<BadgeCardProps> = ({ badge, index, onUnlock }) => {
       <View style={[
         styles.badgeContent,
         { 
-          backgroundColor: colors.card,
-          borderColor: isUnlocked ? rarityColor : colors.border,
+          borderColor: isUnlocked ? rarityColor : theme.colors.border,
           borderWidth: isUnlocked ? 2 : 1,
         }
       ]}>
         <View style={[
           styles.badgeIcon,
           { 
-            backgroundColor: isUnlocked ? rarityColor + '20' : colors.tabIconDefault + '20'
+            backgroundColor: isUnlocked ? rarityColor + '20' : theme.colors.textSecondary + '20'
           }
         ]}>
           <IconSymbol
-            name={badge.icon as any}
+            name={badge.icon}
             size={24}
-            color={isUnlocked ? rarityColor : colors.tabIconDefault}
+            color={isUnlocked ? rarityColor : theme.colors.textSecondary}
           />
         </View>
 
         <Text style={[
           styles.badgeName,
           { 
-            color: isUnlocked ? colors.text : colors.tabIconDefault,
-            fontWeight: isUnlocked ? '600' : '400'
+            color: isUnlocked ? theme.colors.text : theme.colors.textSecondary,
           }
         ]}>
           {badge.name}
         </Text>
 
-        <Text style={[styles.badgeDescription, { color: colors.tabIconDefault }]}>
+        <Text style={styles.badgeDescription}>
           {badge.description}
         </Text>
 
-        {/* Progress bar for badges in progress */}
         {!isUnlocked && badge.maxProgress && (
           <View style={styles.progressContainer}>
-            <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
+            <View style={styles.progressBar}>
               <View
                 style={[
                   styles.progressFill,
@@ -172,22 +165,20 @@ const BadgeCard: React.FC<BadgeCardProps> = ({ badge, index, onUnlock }) => {
                 ]}
               />
             </View>
-            <Text style={[styles.progressText, { color: colors.tabIconDefault }]}>
+            <Text style={styles.progressText}>
               {progress}/{maxProgress}
             </Text>
           </View>
         )}
 
-        {/* Rarity indicator */}
         <View style={[styles.rarityBadge, { backgroundColor: rarityColor + '20' }]}>
           <Text style={[styles.rarityText, { color: rarityColor }]}>
             {badge.rarity.toUpperCase()}
           </Text>
         </View>
 
-        {/* Unlock date */}
         {isUnlocked && badge.unlockedAt && (
-          <Text style={[styles.unlockDate, { color: colors.tabIconDefault }]}>
+          <Text style={styles.unlockDate}>
             Unlocked {badge.unlockedAt.toLocaleDateString()}
           </Text>
         )}
@@ -196,9 +187,9 @@ const BadgeCard: React.FC<BadgeCardProps> = ({ badge, index, onUnlock }) => {
   );
 };
 
-export const BadgeSystem: React.FC<BadgeSystemProps> = ({ badges, onBadgeUnlock }) => {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+export const BadgeSystem: React.FC<BadgeSystemProps> = ({ badges }) => {
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
 
   const unlockedBadges = badges.filter(badge => badge.unlockedAt);
   const lockedBadges = badges.filter(badge => !badge.unlockedAt);
@@ -206,26 +197,23 @@ export const BadgeSystem: React.FC<BadgeSystemProps> = ({ badges, onBadgeUnlock 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>
+        <Text style={styles.title}>
           Achievements
         </Text>
-        <Text style={[styles.subtitle, { color: colors.tabIconDefault }]}>
+        <Text style={styles.subtitle}>
           {unlockedBadges.length} of {badges.length} unlocked
         </Text>
       </View>
 
       <View style={styles.badgesGrid}>
-        {/* Show unlocked badges first */}
         {unlockedBadges.map((badge, index) => (
           <BadgeCard
             key={badge.id}
             badge={badge}
             index={index}
-            onUnlock={() => onBadgeUnlock?.(badge)}
           />
         ))}
         
-        {/* Then show locked badges */}
         {lockedBadges.map((badge, index) => (
           <BadgeCard
             key={badge.id}
@@ -238,28 +226,29 @@ export const BadgeSystem: React.FC<BadgeSystemProps> = ({ badges, onBadgeUnlock 
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
-    padding: 20,
+    padding: theme.spacing[5],
   },
   header: {
-    marginBottom: 24,
+    marginBottom: theme.spacing[6],
     alignItems: 'center',
   },
   title: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 8,
+    fontSize: theme.fontSizes['2xl'],
+    fontWeight: theme.fontWeights.bold,
+    marginBottom: theme.spacing[2],
+    color: theme.colors.text,
   },
   subtitle: {
-    fontSize: 16,
-    opacity: 0.7,
+    fontSize: theme.fontSizes.md,
+    color: theme.colors.textSecondary,
   },
   badgesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 16,
+    gap: theme.spacing[4],
   },
   badgeCard: {
     width: '48%',
@@ -271,70 +260,74 @@ const styles = StyleSheet.create({
     left: -4,
     right: -4,
     bottom: -4,
-    borderRadius: 16,
+    borderRadius: theme.radii.lg,
     opacity: 0.3,
   },
   sparkleContainer: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: theme.spacing[2],
+    right: theme.spacing[2],
     zIndex: 10,
   },
   badgeContent: {
-    padding: 16,
-    borderRadius: 12,
+    padding: theme.spacing[4],
+    borderRadius: theme.radii.lg,
     alignItems: 'center',
     minHeight: 180,
+    backgroundColor: theme.colors.card,
   },
   badgeIcon: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: theme.radii.full,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: theme.spacing[3],
   },
   badgeName: {
-    fontSize: 16,
+    fontSize: theme.fontSizes.md,
+    fontWeight: theme.fontWeights.semibold,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: theme.spacing[2],
   },
   badgeDescription: {
-    fontSize: 12,
+    fontSize: theme.fontSizes.xs,
     textAlign: 'center',
-    lineHeight: 16,
-    marginBottom: 12,
-    opacity: 0.8,
+    lineHeight: theme.lineHeights.normal,
+    marginBottom: theme.spacing[3],
+    color: theme.colors.textSecondary,
   },
   progressContainer: {
     width: '100%',
-    marginBottom: 12,
+    marginBottom: theme.spacing[3],
   },
   progressBar: {
     height: 4,
-    borderRadius: 2,
-    marginBottom: 4,
+    borderRadius: theme.radii.full,
+    backgroundColor: theme.colors.border,
+    marginBottom: theme.spacing[1],
   },
   progressFill: {
     height: '100%',
-    borderRadius: 2,
+    borderRadius: theme.radii.full,
   },
   progressText: {
     fontSize: 10,
     textAlign: 'center',
+    color: theme.colors.textSecondary,
   },
   rarityBadge: {
-    paddingHorizontal: 8,
+    paddingHorizontal: theme.spacing[2],
     paddingVertical: 2,
-    borderRadius: 8,
-    marginBottom: 8,
+    borderRadius: theme.radii.md,
+    marginBottom: theme.spacing[2],
   },
   rarityText: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: theme.fontWeights.bold,
   },
   unlockDate: {
     fontSize: 10,
-    opacity: 0.6,
+    color: theme.colors.textSecondary,
   },
 });

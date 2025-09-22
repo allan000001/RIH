@@ -9,7 +9,7 @@ import Animated, {
   SlideInDown,
 } from 'react-native-reanimated';
 import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/lib/use-color-scheme';
 
 export type CardVariant = 'default' | 'elevated' | 'outlined' | 'surface';
 export type CardAnimation = 'none' | 'fadeIn' | 'slideIn' | 'stagger';

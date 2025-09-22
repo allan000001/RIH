@@ -20,10 +20,10 @@ import Animated, {
   SlideOutDown,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/lib/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Button } from '@/components/ui/button';
+import { IconSymbol } from '@/components/design-system/icon-symbol';
+import { Button } from '@/components/design-system/button';
 
 const { width, height } = Dimensions.get('window');
 

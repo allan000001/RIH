@@ -11,10 +11,10 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  withTiming,
 } from 'react-native-reanimated';
-import { Colors, Fonts } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import * as Haptics from 'expo-haptics';
+import { useTheme } from '@/lib/useTheme';
+import { Theme } from '@/constants/theme';
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
@@ -44,28 +44,26 @@ export function Button({
   fullWidth = false,
   style,
   textStyle,
-  role = 'neutral',
 }: ButtonProps) {
-  const colorScheme = useColorScheme();
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
   const scale = useSharedValue(1);
-  const opacity = useSharedValue(1);
-
-  const colors = Colors[colorScheme ?? 'light'];
-  const roleColors = role !== 'neutral' ? Colors[role][colorScheme ?? 'light'] : null;
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
-    opacity: opacity.value,
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.95, { damping: 15, stiffness: 300 });
-    opacity.value = withTiming(0.8, { duration: 100 });
+    scale.value = withSpring(0.97, { damping: 10, stiffness: 400 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15, stiffness: 300 });
-    opacity.value = withTiming(1, { duration: 100 });
+    scale.value = withSpring(1, { damping: 10, stiffness: 400 });
+  };
+
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress();
   };
 
   const getButtonStyle = (): ViewStyle => {
@@ -75,46 +73,41 @@ export function Button({
     switch (variant) {
       case 'primary':
         variantStyle = {
-          backgroundColor: roleColors?.primary || colors.tint,
-          borderWidth: 0,
+          backgroundColor: theme.colors.primary,
         };
         break;
       case 'secondary':
         variantStyle = {
-          backgroundColor: colors.surface,
+          backgroundColor: theme.colors.card,
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: theme.colors.border,
         };
         break;
       case 'outline':
         variantStyle = {
           backgroundColor: 'transparent',
           borderWidth: 2,
-          borderColor: roleColors?.primary || colors.tint,
+          borderColor: theme.colors.primary,
         };
         break;
       case 'ghost':
         variantStyle = {
           backgroundColor: 'transparent',
-          borderWidth: 0,
         };
         break;
       case 'success':
         variantStyle = {
-          backgroundColor: colors.success,
-          borderWidth: 0,
+          backgroundColor: theme.colors.success,
         };
         break;
       case 'warning':
         variantStyle = {
-          backgroundColor: colors.warning,
-          borderWidth: 0,
+          backgroundColor: theme.colors.warning,
         };
         break;
       case 'error':
         variantStyle = {
-          backgroundColor: colors.error,
-          borderWidth: 0,
+          backgroundColor: theme.colors.error,
         };
         break;
     }
@@ -131,21 +124,21 @@ export function Button({
   };
 
   const getTextStyle = (): TextStyle => {
-    let color = colors.text;
+    let color = theme.colors.text;
 
     switch (variant) {
       case 'primary':
       case 'success':
       case 'warning':
       case 'error':
-        color = '#FFFFFF';
+        color = theme.colors.primaryContrast;
         break;
       case 'outline':
       case 'ghost':
-        color = roleColors?.primary || colors.tint;
+        color = theme.colors.primary;
         break;
       case 'secondary':
-        color = colors.text;
+        color = theme.colors.text;
         break;
     }
 
@@ -159,7 +152,7 @@ export function Button({
   return (
     <AnimatedTouchableOpacity
       style={[getButtonStyle(), animatedStyle, style]}
-      onPress={onPress}
+      onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={disabled || loading}
@@ -167,7 +160,7 @@ export function Button({
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === 'primary' || variant === 'success' || variant === 'warning' || variant === 'error' ? '#FFFFFF' : colors.tint}
+          color={variant === 'primary' || variant === 'success' || variant === 'warning' || variant === 'error' ? theme.colors.primaryContrast : theme.colors.primary}
           size="small"
         />
       ) : (
@@ -177,28 +170,28 @@ export function Button({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   // Size variants
   small: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingHorizontal: theme.spacing[3],
+    paddingVertical: theme.spacing[2],
+    borderRadius: theme.radii.md,
     minHeight: 36,
     justifyContent: 'center',
     alignItems: 'center',
   },
   medium: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[3],
+    borderRadius: theme.radii.lg,
     minHeight: 44,
     justifyContent: 'center',
     alignItems: 'center',
   },
   large: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderRadius: 16,
+    paddingHorizontal: theme.spacing[6],
+    paddingVertical: theme.spacing[4],
+    borderRadius: theme.radii.lg,
     minHeight: 52,
     justifyContent: 'center',
     alignItems: 'center',
@@ -206,20 +199,17 @@ const styles = StyleSheet.create({
 
   // Text styles
   text: {
-    fontFamily: Fonts.sans,
-    fontWeight: '600',
+    fontFamily: theme.fonts.sans,
+    fontWeight: theme.fontWeights.semibold,
     textAlign: 'center',
   },
   smallText: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: theme.fontSizes.sm,
   },
   mediumText: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: theme.fontSizes.md,
   },
   largeText: {
-    fontSize: 18,
-    lineHeight: 28,
+    fontSize: theme.fontSizes.lg,
   },
 });

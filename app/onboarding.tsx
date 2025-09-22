@@ -14,11 +14,11 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/design-system/card';
+import { Button } from '@/components/design-system/button';
 import { Colors } from '@/constants/theme';
-// import { useColorScheme } from '@/hooks/use-color-scheme'; // Removed for forced dark mode
-import { useApp } from '@/contexts/app-context';
+// import { useColorScheme } from '@/lib/use-color-scheme'; // Removed for forced dark mode
+import { useApp } from '@/lib/app-context';
 
 export default function OnboardingScreen() {
   const router = useRouter();

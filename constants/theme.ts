@@ -1,175 +1,210 @@
-/**
- * airLink Design System - Role-based theming for Host (Green) and Connector (Blue)
- * Enhanced color palette with semantic colors for connection states and gamification
- */
-
 import { Platform } from 'react-native';
 
-// Role-based primary colors
-const hostColorLight = '#22C55E'; // Green for Host
-const hostColorDark = '#16A34A';
-const connectorColorLight = '#3B82F6'; // Blue for Connector  
-const connectorColorDark = '#2563EB';
+const palette = {
+  // Neutral Colors
+  neutral100: '#FFFFFF',
+  neutral200: '#F8FAFC',
+  neutral300: '#F1F5F9',
+  neutral400: '#E2E8F0',
+  neutral500: '#CBD5E1',
+  neutral600: '#94A3B8',
+  neutral700: '#64748B',
+  neutral800: '#334155',
+  neutral900: '#1E293B',
+  neutral1000: '#0F172A',
 
-// Semantic colors for connection states
-const successColor = '#10B981';
-const warningColor = '#F59E0B';
-const errorColor = '#EF4444';
-const neutralColor = '#6B7280';
+  // Host Colors (Green)
+  host100: '#F0FDF4',
+  host200: '#DCFCE7',
+  host300: '#BBF7D0',
+  host400: '#86EFAC',
+  host500: '#4ADE80',
+  host600: '#22C55E', // Primary
+  host700: '#16A34A',
+  host800: '#15803D',
+  host900: '#166534',
 
-export const Colors = {
-  light: {
-    text: '#11181C',
-    textSecondary: '#687076',
-    background: '#fff',
-    card: '#fff',
-    tint: '#0a7ea4', // Default tint, overridden by role
-    primary: '#0a7ea4', // Default primary color
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: '#0a7ea4',
-    
-    // Semantic colors
-    success: successColor,
-    warning: warningColor,
-    error: errorColor,
-    neutral: neutralColor,
-    
-    // Surface colors
-    surface: '#F8FAFC',
-    surfaceSecondary: '#F1F5F9',
-    border: '#E2E8F0',
-    
-    // Connection status colors
-    connected: successColor,
-    connecting: warningColor,
-    disconnected: neutralColor,
-    
-    // Gamification colors
-    badge: '#8B5CF6',
-    progress: '#06B6D4',
-  },
-  dark: {
-    text: '#ECEDEE',
-    textSecondary: '#9BA1A6',
-    background: '#151718',
-    card: '#1F2937',
-    tint: '#fff',
-    primary: '#fff', // Default primary color for dark mode
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: '#fff',
-    
-    // Semantic colors (adjusted for dark mode)
-    success: '#059669',
-    warning: '#D97706',
-    error: '#DC2626',
-    neutral: '#9CA3AF',
-    
-    // Surface colors
-    surface: '#1E293B',
-    surfaceSecondary: '#334155',
-    border: '#475569',
-    
-    // Connection status colors
-    connected: '#059669',
-    connecting: '#D97706',
-    disconnected: '#9CA3AF',
-    
-    // Gamification colors
-    badge: '#7C3AED',
-    progress: '#0891B2',
-  },
-  
-  // Role-specific themes
-  host: {
-    light: {
-      primary: '#10B981', // Emerald green
-      primaryDark: '#059669',
-      accent: '#34D399', // Light green accent
-      tint: '#10B981',
-      tabIconSelected: '#10B981',
-      surface: '#F0FDF4', // Very light green
-      surfaceSecondary: '#DCFCE7',
-      background: '#FAFFFE', // Almost white with green tint
-      cardBackground: '#FFFFFF',
-      text: '#0F172A', // Dark slate
-      textSecondary: '#475569',
-      border: '#E2E8F0',
-      shadow: 'rgba(16, 185, 129, 0.1)',
-    },
-    dark: {
-      primary: '#10B981',
-      primaryDark: '#059669', 
-      accent: '#6EE7B7',
-      tint: '#10B981',
-      tabIconSelected: '#10B981',
-      surface: '#0F1419', // Very dark with green tint
-      surfaceSecondary: '#1A1F25',
-      background: '#0A0E13', // Deep black-green
-      cardBackground: '#151B20',
-      text: '#F8FAFC',
-      textSecondary: '#CBD5E1',
-      border: '#334155',
-      shadow: 'rgba(16, 185, 129, 0.2)',
-    }
-  },
-  
-  connector: {
-    light: {
-      primary: '#3B82F6', // Blue
-      primaryDark: '#2563EB',
-      accent: '#60A5FA', // Light blue accent
-      tint: '#3B82F6',
-      tabIconSelected: '#3B82F6',
-      surface: '#EFF6FF', // Very light blue
-      surfaceSecondary: '#DBEAFE',
-      background: '#FAFBFF', // Almost white with blue tint
-      cardBackground: '#FFFFFF',
-      text: '#0F172A', // Dark slate
-      textSecondary: '#475569',
-      border: '#E2E8F0',
-      shadow: 'rgba(59, 130, 246, 0.1)',
-    },
-    dark: {
-      primary: '#3B82F6',
-      primaryDark: '#2563EB',
-      accent: '#93C5FD',
-      tint: '#3B82F6',
-      tabIconSelected: '#3B82F6',
-      surface: '#0F1419', // Very dark with blue tint
-      surfaceSecondary: '#1A1F25',
-      background: '#0A0E13', // Deep black-blue
-      cardBackground: '#151B20',
-      text: '#F8FAFC',
-      textSecondary: '#CBD5E1',
-      border: '#334155',
-      shadow: 'rgba(59, 130, 246, 0.2)',
-    }
-  }
+  // Connector Colors (Blue)
+  connector100: '#EFF6FF',
+  connector200: '#DBEAFE',
+  connector300: '#BFDBFE',
+  connector400: '#93C5FD',
+  connector500: '#60A5FA',
+  connector600: '#3B82F6', // Primary
+  connector700: '#2563EB',
+  connector800: '#1D4ED8',
+  connector900: '#1E40AF',
+
+  // Semantic Colors
+  success500: '#10B981',
+  warning500: '#F59E0B',
+  error500: '#EF4444',
+
+  // Gamification & Accent
+  badge500: '#8B5CF6',
+  progress500: '#06B6D4',
 };
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
+const typography = {
+  fonts: Platform.select({
+    ios: {
+      sans: 'system-ui',
+      serif: 'ui-serif',
+      rounded: 'ui-rounded',
+      mono: 'ui-monospace',
+    },
+    default: {
+      sans: 'normal',
+      serif: 'serif',
+      rounded: 'normal',
+      mono: 'monospace',
+    },
+    web: {
+      sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+      serif: "Georgia, 'Times New Roman', serif",
+      rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
+      mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+    },
+  }),
+  fontSizes: {
+    xs: 12,
+    sm: 14,
+    md: 16, // Base
+    lg: 18,
+    xl: 20,
+    '2xl': 24,
+    '3xl': 30,
   },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
+  fontWeights: {
+    light: '300',
+    normal: '400',
+    medium: '500',
+    semibold: '600',
+    bold: '700',
   },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+  lineHeights: {
+    tight: 1.25,
+    normal: 1.5,
+    loose: 1.75,
   },
-});
+};
+
+const spacing = {
+  '0': 0,
+  '1': 4,
+  '2': 8,
+  '3': 12,
+  '4': 16,
+  '5': 20,
+  '6': 24,
+  '8': 32,
+  '10': 40,
+  '12': 48,
+  '16': 64,
+};
+
+const radii = {
+  sm: 4,
+  md: 8,
+  lg: 16,
+  full: 9999,
+};
+
+const shadows = {
+  sm: {
+    shadowColor: palette.neutral1000,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  md: {
+    shadowColor: palette.neutral1000,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  lg: {
+    shadowColor: palette.neutral1000,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 15,
+    elevation: 10,
+  },
+};
+
+const lightTheme = {
+  colors: {
+    primary: palette.host600,
+    primaryContrast: palette.neutral100,
+    secondary: palette.neutral800,
+    background: palette.neutral200,
+    card: palette.neutral100,
+    text: palette.neutral900,
+    textSecondary: palette.neutral700,
+    border: palette.neutral400,
+    success: palette.success500,
+    warning: palette.warning500,
+    error: palette.error500,
+    badge: palette.badge500,
+    progress: palette.progress500,
+  },
+  ...typography,
+  spacing,
+  radii,
+  shadows,
+};
+
+const darkTheme = {
+  ...lightTheme,
+  colors: {
+    ...lightTheme.colors,
+    primary: palette.host600,
+    background: palette.neutral1000,
+    card: palette.neutral900,
+    text: palette.neutral100,
+    textSecondary: palette.neutral500,
+    border: palette.neutral800,
+  },
+};
+
+const themes = {
+  light: lightTheme,
+  dark: darkTheme,
+  host: {
+    light: {
+      ...lightTheme,
+      colors: {
+        ...lightTheme.colors,
+        primary: palette.host600,
+      },
+    },
+    dark: {
+      ...darkTheme,
+      colors: {
+        ...darkTheme.colors,
+        primary: palette.host600,
+      },
+    },
+  },
+  connector: {
+    light: {
+      ...lightTheme,
+      colors: {
+        ...lightTheme.colors,
+        primary: palette.connector600,
+      },
+    },
+    dark: {
+      ...darkTheme,
+      colors: {
+        ...darkTheme.colors,
+        primary: palette.connector600,
+      },
+    },
+  },
+};
+
+export type Theme = typeof lightTheme;
+export default themes;

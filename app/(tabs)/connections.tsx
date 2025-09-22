@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
-  Alert,
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
@@ -20,22 +19,25 @@ import Animated, {
   runOnJS,
   FadeIn,
   FadeInDown,
-  SlideInUp,
-  SlideInRight,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Input } from '@/components/ui/input';
-import { StatusIndicator } from '@/components/ui/status-indicator';
-import { Colors } from '@/constants/theme';
-import { useApp } from '@/contexts/app-context';
-// import { useColorScheme } from '@/hooks/use-color-scheme'; // Removed for forced dark mode
+import { Button } from '@/components/design-system/button';
+import { Card, CardContent } from '@/components/design-system/card';
+import { IconSymbol } from '@/components/design-system/icon-symbol';
+import { Input } from '@/components/design-system/input';
+import { StatusIndicator } from '@/components/design-system/status-indicator';
+import { useApp } from '@/lib/app-context';
+import { useTheme } from '@/lib/useTheme';
+import { Theme } from '@/constants/theme';
+import { api } from '@/services/api';
 
 const { width } = Dimensions.get('window');
 
+/**
+ * @interface Connection
+ * @description Represents a connection to the host.
+ */
 interface Connection {
   id: string;
   name: string;
@@ -52,80 +54,31 @@ interface Connection {
 type FilterType = 'all' | 'connected' | 'pending' | 'disconnected';
 type SortType = 'name' | 'dataUsed' | 'connectedAt' | 'trustLevel';
 
+/**
+ * ConnectionsScreen
+ * @description This screen displays a list of connections for the host, with options to filter, sort, and manage them.
+ */
 export default function ConnectionsScreen() {
-  const colorScheme = 'dark'; // Force dark mode
-  const colors = Colors.dark;
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
   const { state } = useApp();
   const { userRole } = state;
-  
-  // Ensure colors object has required properties
-  const safeColors = {
-    ...colors,
-    text: colors.text || '#000000',
-    tabIconDefault: colors.tabIconDefault || '#666666',
-  };
-  const roleColors = userRole ? Colors[userRole].dark : colors;
 
   const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [connections, setConnections] = useState<Connection[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortType>('connectedAt');
   const [selectedConnections, setSelectedConnections] = useState<string[]>([]);
   const [showBulkActions, setShowBulkActions] = useState(false);
 
-  // Mock connections data
-  const [connections] = useState<Connection[]>([
-    {
-      id: '1',
-      name: 'Sarah\'s iPhone',
-      deviceType: 'iPhone 15 Pro',
-      status: 'connected',
-      connectedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      dataUsed: 1250,
-      bandwidth: 15.2,
-      location: 'New York, NY',
-      avatar: '👩‍💻',
-      trustLevel: 'high',
-    },
-    {
-      id: '2',
-      name: 'John\'s MacBook',
-      deviceType: 'MacBook Pro M3',
-      status: 'connected',
-      connectedAt: new Date(Date.now() - 45 * 60 * 1000),
-      dataUsed: 2100,
-      bandwidth: 22.8,
-      location: 'San Francisco, CA',
-      avatar: '👨‍💼',
-      trustLevel: 'high',
-    },
-    {
-      id: '3',
-      name: 'Alex\'s Android',
-      deviceType: 'Samsung Galaxy S24',
-      status: 'pending',
-      dataUsed: 0,
-      bandwidth: 0,
-      location: 'Los Angeles, CA',
-      avatar: '🧑‍🎓',
-      trustLevel: 'medium',
-    },
-    {
-      id: '4',
-      name: 'Emma\'s iPad',
-      deviceType: 'iPad Air',
-      status: 'connecting',
-      dataUsed: 0,
-      bandwidth: 8.5,
-      location: 'Chicago, IL',
-      avatar: '👩‍🎨',
-      trustLevel: 'medium',
-    },
-  ]);
-
   const filterAnimations = Array.from({ length: 4 }, () => useSharedValue(0));
   const bulkActionsAnimation = useSharedValue(0);
+
+  useEffect(() => {
+    fetchConnections();
+  }, []);
 
   useEffect(() => {
     // Animate filter buttons
@@ -138,9 +91,17 @@ export default function ConnectionsScreen() {
     bulkActionsAnimation.value = withSpring(showBulkActions ? 1 : 0, { damping: 15 });
   }, [showBulkActions]);
 
+  const fetchConnections = async () => {
+    setLoading(true);
+    const fetchedConnections = await api.getConnections();
+    setConnections(fetchedConnections);
+    setLoading(false);
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
+    await fetchConnections();
+    setRefreshing(false);
   };
 
   const filteredConnections = connections.filter(conn => {
@@ -174,17 +135,17 @@ export default function ConnectionsScreen() {
 
   const handleApprove = (id: string) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    // Update connection status
+    // TODO: Implement API call to approve connection
   };
 
   const handleReject = (id: string) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    // Remove connection
+    // TODO: Implement API call to reject connection
   };
 
   const handleDisconnect = (id: string) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    // Disconnect connection
+    // TODO: Implement API call to disconnect connection
   };
 
   const toggleConnectionSelection = (id: string) => {
@@ -208,22 +169,12 @@ export default function ConnectionsScreen() {
     setShowBulkActions(false);
   };
 
-  const getStatusColor = (status: Connection['status']) => {
-    switch (status) {
-      case 'connected': return colors.success;
-      case 'connecting': return colors.warning;
-      case 'pending': return colors.warning;
-      case 'disconnected': return colors.error;
-      default: return colors.tabIconDefault;
-    }
-  };
-
   const getTrustLevelColor = (level: Connection['trustLevel']) => {
     switch (level) {
-      case 'high': return colors.success;
-      case 'medium': return colors.warning;
-      case 'low': return colors.error;
-      default: return colors.tabIconDefault;
+      case 'high': return theme.colors.success;
+      case 'medium': return theme.colors.warning;
+      case 'low': return theme.colors.error;
+      default: return theme.colors.textSecondary;
     }
   };
 
@@ -257,16 +208,16 @@ export default function ConnectionsScreen() {
         <CardContent>
           <View style={styles.skeletonContent}>
             <View style={styles.skeletonHeader}>
-              <View style={[styles.skeletonAvatar, { backgroundColor: colors.tabIconDefault + '20' }]} />
+              <View style={[styles.skeletonAvatar, { backgroundColor: theme.colors.border }]} />
               <View style={styles.skeletonInfo}>
-                <View style={[styles.skeletonLine, styles.skeletonTitle, { backgroundColor: colors.tabIconDefault + '20' }]} />
-                <View style={[styles.skeletonLine, styles.skeletonSubtitle, { backgroundColor: colors.tabIconDefault + '15' }]} />
+                <View style={[styles.skeletonLine, styles.skeletonTitle, { backgroundColor: theme.colors.border }]} />
+                <View style={[styles.skeletonLine, styles.skeletonSubtitle, { backgroundColor: theme.colors.border }]} />
               </View>
-              <View style={[styles.skeletonStatus, { backgroundColor: colors.tabIconDefault + '20' }]} />
+              <View style={[styles.skeletonStatus, { backgroundColor: theme.colors.border }]} />
             </View>
             <View style={styles.skeletonStats}>
               {[1, 2, 3].map((i) => (
-                <View key={i} style={[styles.skeletonStat, { backgroundColor: colors.tabIconDefault + '15' }]} />
+                <View key={i} style={[styles.skeletonStat, { backgroundColor: theme.colors.border }]} />
               ))}
             </View>
           </View>
@@ -281,15 +232,11 @@ export default function ConnectionsScreen() {
     onApprove, 
     onReject, 
     onDisconnect, 
-    style, 
-    delay 
   }: { 
     connection: Connection; 
     onApprove?: (id: string) => void;
     onReject?: (id: string) => void;
     onDisconnect?: (id: string) => void;
-    style?: any;
-    delay?: number;
   }) => {
     const translateX = useSharedValue(0);
     const opacity = useSharedValue(1);
@@ -345,22 +292,20 @@ export default function ConnectionsScreen() {
 
     return (
       <View style={styles.swipeContainer}>
-        {/* Left Action (Approve for pending) */}
         {connection.status === 'pending' && (
           <Animated.View style={[styles.swipeAction, styles.leftAction, leftActionStyle]}>
-            <IconSymbol name="checkmark.circle.fill" size={32} color="#10B981" />
-            <Text style={[styles.swipeActionText, { color: '#10B981' }]}>Approve</Text>
+            <IconSymbol name="checkmark.circle.fill" size={32} color={theme.colors.primaryContrast} />
+            <Text style={[styles.swipeActionText, { color: theme.colors.primaryContrast }]}>Approve</Text>
           </Animated.View>
         )}
 
-        {/* Right Action (Reject/Disconnect) */}
         <Animated.View style={[styles.swipeAction, styles.rightAction, rightActionStyle]}>
           <IconSymbol 
             name={connection.status === 'connected' ? "xmark.circle.fill" : "trash.circle.fill"} 
             size={32} 
-            color="#EF4444" 
+            color={theme.colors.primaryContrast}
           />
-          <Text style={[styles.swipeActionText, { color: '#EF4444' }]}>
+          <Text style={[styles.swipeActionText, { color: theme.colors.primaryContrast }]}>
             {connection.status === 'connected' ? 'Disconnect' : 'Reject'}
           </Text>
         </Animated.View>
@@ -369,13 +314,13 @@ export default function ConnectionsScreen() {
           <Animated.View style={cardStyle}>
             <Card 
               variant="default" 
-              style={(() => {
-                const baseStyle = styles.connectionCard;
-                const selectedStyle = selectedConnections.includes(connection.id) 
-                  ? { borderColor: roleColors.primary, borderWidth: 2 }
-                  : {};
-                return { ...baseStyle, ...selectedStyle };
-              })()}
+              style={[
+                styles.connectionCard,
+                selectedConnections.includes(connection.id) && {
+                  borderColor: theme.colors.primary,
+                  borderWidth: 2,
+                },
+              ]}
             >
               <CardContent>
                 <TouchableOpacity
@@ -399,13 +344,13 @@ export default function ConnectionsScreen() {
                       </View>
                       
                       <View style={styles.connectionDetails}>
-                        <Text style={[styles.connectionName, { color: safeColors.text }]}>
+                        <Text style={styles.connectionName}>
                           {connection.name}
                         </Text>
-                        <Text style={[styles.connectionDevice, { color: safeColors.tabIconDefault }]}>
+                        <Text style={styles.connectionDevice}>
                           {connection.deviceType}
                         </Text>
-                        <Text style={[styles.connectionLocation, { color: safeColors.tabIconDefault }]}>
+                        <Text style={styles.connectionLocation}>
                           📍 {connection.location}
                         </Text>
                       </View>
@@ -422,33 +367,33 @@ export default function ConnectionsScreen() {
 
                   <View style={styles.connectionStats}>
                     <View style={styles.statItem}>
-                      <IconSymbol name="arrow.up.circle" size={16} color={colors.tabIconDefault} />
-                      <Text style={[styles.statLabel, { color: colors.tabIconDefault }]}>
+                      <IconSymbol name="arrow.up.circle" size={16} color={theme.colors.textSecondary} />
+                      <Text style={styles.statLabel}>
                         Data Used
                       </Text>
-                      <Text style={[styles.statValue, { color: safeColors.text }]}>
+                      <Text style={styles.statValue}>
                         {formatDataUsage(connection.dataUsed)}
                       </Text>
                     </View>
 
                     {connection.status === 'connected' && (
                       <View style={styles.statItem}>
-                        <IconSymbol name="arrow.clockwise.circle" size={16} color={colors.success} />
-                        <Text style={[styles.statLabel, { color: colors.tabIconDefault }]}>
+                        <IconSymbol name="arrow.clockwise.circle" size={16} color={theme.colors.success} />
+                        <Text style={styles.statLabel}>
                           Speed
                         </Text>
-                        <Text style={[styles.statValue, { color: safeColors.text }]}>
+                        <Text style={styles.statValue}>
                           {connection.bandwidth.toFixed(1)} Mbps
                         </Text>
                       </View>
                     )}
 
                     <View style={styles.statItem}>
-                      <IconSymbol name="clock" size={16} color={colors.tabIconDefault} />
-                      <Text style={[styles.statLabel, { color: colors.tabIconDefault }]}>
+                      <IconSymbol name="clock" size={16} color={theme.colors.textSecondary} />
+                      <Text style={styles.statLabel}>
                         Last Seen
                       </Text>
-                      <Text style={[styles.statValue, { color: safeColors.text }]}>
+                      <Text style={styles.statValue}>
                         {formatTimeAgo(connection.connectedAt)}
                       </Text>
                     </View>
@@ -499,13 +444,13 @@ export default function ConnectionsScreen() {
 
   if (userRole !== 'host') {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <SafeAreaView style={styles.container}>
         <View style={styles.emptyState}>
-          <IconSymbol name="person.2" size={64} color={colors.tabIconDefault} />
-          <Text style={[styles.emptyTitle, { color: safeColors.text }]}>
+          <IconSymbol name="person.2" size={64} color={theme.colors.textSecondary} />
+          <Text style={styles.emptyTitle}>
             Connections
           </Text>
-          <Text style={[styles.emptySubtitle, { color: colors.tabIconDefault }]}>
+          <Text style={styles.emptySubtitle}>
             This feature is only available for hosts
           </Text>
         </View>
@@ -514,14 +459,14 @@ export default function ConnectionsScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <Animated.View entering={FadeIn.delay(100)} style={styles.header}>
         <View>
-          <Text style={[styles.title, { color: safeColors.text }]}>
+          <Text style={styles.title}>
             Connections
           </Text>
-          <Text style={[styles.subtitle, { color: colors.tabIconDefault }]}>
+          <Text style={styles.subtitle}>
             {filteredConnections.length} total • {filteredConnections.filter(c => c.status === 'connected').length} active
           </Text>
         </View>
@@ -560,14 +505,14 @@ export default function ConnectionsScreen() {
                   style={[
                     styles.filterButton,
                     selectedFilter === filter.key && {
-                      backgroundColor: roleColors.primary,
+                      backgroundColor: theme.colors.primary,
                     }
                   ]}
                   onPress={() => setSelectedFilter(filter.key as FilterType)}
                 >
                   <Text style={[
                     styles.filterButtonText,
-                    { color: selectedFilter === filter.key ? 'white' : safeColors.text }
+                    { color: selectedFilter === filter.key ? theme.colors.primaryContrast : theme.colors.text }
                   ]}>
                     {filter.label} ({filter.count})
                   </Text>
@@ -584,7 +529,7 @@ export default function ConnectionsScreen() {
           <Card variant="elevated">
             <CardContent>
               <View style={styles.bulkActionsContent}>
-                <Text style={[styles.bulkActionsText, { color: safeColors.text }]}>
+                <Text style={styles.bulkActionsText}>
                   {selectedConnections.length} selected
                 </Text>
                 <View style={styles.bulkActionsButtons}>
@@ -624,27 +569,25 @@ export default function ConnectionsScreen() {
               <ConnectionSkeleton key={`skeleton-${index}`} />
             ))
           ) : (
-            filteredConnections.map((connection, index) => (
+            sortedConnections.map((connection, index) => (
               <SwipeableConnectionCard
                 key={connection.id}
                 connection={connection}
                 onApprove={handleApprove}
                 onReject={handleReject}
                 onDisconnect={handleDisconnect}
-                style={{ marginBottom: 12 }}
-                delay={index * 100}
               />
             ))
           )}
         </View>
 
-        {filteredConnections.length === 0 && (
+        {sortedConnections.length === 0 && !loading && (
           <Animated.View entering={FadeIn.delay(600)} style={styles.emptyState}>
-            <IconSymbol name="magnifyingglass" size={64} color={colors.tabIconDefault} />
-            <Text style={[styles.emptyTitle, { color: safeColors.text }]}>
+            <IconSymbol name="magnifyingglass" size={64} color={theme.colors.textSecondary} />
+            <Text style={styles.emptyTitle}>
               No connections found
             </Text>
-            <Text style={[styles.emptySubtitle, { color: colors.tabIconDefault }]}>
+            <Text style={styles.emptySubtitle}>
               {searchQuery ? 'Try adjusting your search or filters' : 'Share your Host ID to get started'}
             </Text>
           </Animated.View>
@@ -654,49 +597,52 @@ export default function ConnectionsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    paddingHorizontal: 24,
-    paddingVertical: 20,
+    paddingHorizontal: theme.spacing[6],
+    paddingVertical: theme.spacing[5],
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    fontSize: theme.fontSizes['3xl'],
+    fontWeight: theme.fontWeights.bold,
+    marginBottom: theme.spacing[1],
+    color: theme.colors.text,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: theme.fontSizes.md,
+    color: theme.colors.textSecondary,
   },
   searchSection: {
-    paddingHorizontal: 24,
-    marginBottom: 20,
+    paddingHorizontal: theme.spacing[6],
+    marginBottom: theme.spacing[5],
   },
   searchInput: {
-    marginBottom: 16,
+    marginBottom: theme.spacing[4],
   },
   filtersContainer: {
-    marginBottom: 8,
+    marginBottom: theme.spacing[2],
   },
   filtersContent: {
-    paddingRight: 24,
-    gap: 12,
+    paddingRight: theme.spacing[6],
+    gap: theme.spacing[3],
   },
   filterButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[2],
+    borderRadius: theme.radii.full,
+    backgroundColor: theme.colors.card,
   },
   filterButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: theme.fontSizes.sm,
+    fontWeight: theme.fontWeights.semibold,
   },
   bulkActions: {
-    marginHorizontal: 24,
-    marginBottom: 16,
+    marginHorizontal: theme.spacing[6],
+    marginBottom: theme.spacing[4],
   },
   bulkActionsContent: {
     flexDirection: 'row',
@@ -704,38 +650,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   bulkActionsText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: theme.fontSizes.md,
+    fontWeight: theme.fontWeights.semibold,
+    color: theme.colors.text,
   },
   bulkActionsButtons: {
     flexDirection: 'row',
-    gap: 12,
+    gap: theme.spacing[3],
   },
   scrollView: {
     flex: 1,
   },
   connectionsList: {
-    paddingHorizontal: 16,
-    gap: 12,
+    paddingHorizontal: theme.spacing[4],
+    gap: theme.spacing[3],
     paddingBottom: 120,
   },
   connectionCard: {
     marginBottom: 0,
   },
   connectionContent: {
-    gap: 12,
-    padding: 4,
+    gap: theme.spacing[3],
+    padding: theme.spacing[1],
   },
   connectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: theme.spacing[2],
   },
   connectionInfo: {
     flexDirection: 'row',
     flex: 1,
-    gap: 12,
+    gap: theme.spacing[3],
   },
   avatarContainer: {
     position: 'relative',
@@ -753,28 +700,31 @@ const styles = StyleSheet.create({
     right: -2,
     width: 16,
     height: 16,
-    borderRadius: 8,
+    borderRadius: theme.radii.full,
     justifyContent: 'center',
     alignItems: 'center',
   },
   trustDot: {
     width: 8,
     height: 8,
-    borderRadius: 4,
+    borderRadius: theme.radii.full,
   },
   connectionDetails: {
     flex: 1,
     gap: 2,
   },
   connectionName: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: theme.fontSizes.lg,
+    fontWeight: theme.fontWeights.semibold,
+    color: theme.colors.text,
   },
   connectionDevice: {
-    fontSize: 14,
+    fontSize: theme.fontSizes.sm,
+    color: theme.colors.textSecondary,
   },
   connectionLocation: {
-    fontSize: 12,
+    fontSize: theme.fontSizes.xs,
+    color: theme.colors.textSecondary,
   },
   connectionStatus: {
     alignItems: 'flex-end',
@@ -782,52 +732,56 @@ const styles = StyleSheet.create({
   connectionStats: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 12,
-    marginTop: 8,
+    paddingTop: theme.spacing[3],
+    marginTop: theme.spacing[2],
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
+    borderTopColor: theme.colors.border,
   },
   statItem: {
     alignItems: 'center',
-    gap: 4,
+    gap: theme.spacing[1],
     flex: 1,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: theme.fontSizes.xs,
+    color: theme.colors.textSecondary,
   },
   statValue: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: theme.fontSizes.sm,
+    fontWeight: theme.fontWeights.semibold,
+    color: theme.colors.text,
   },
   connectionActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: theme.spacing[2],
     justifyContent: 'flex-end',
-    marginTop: 12,
-    paddingTop: 8,
+    marginTop: theme.spacing[3],
+    paddingTop: theme.spacing[2],
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 64,
-    paddingHorizontal: 32,
+    paddingVertical: theme.spacing[16],
+    paddingHorizontal: theme.spacing[8],
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 16,
-    marginBottom: 8,
+    fontSize: theme.fontSizes.xl,
+    fontWeight: theme.fontWeights.bold,
+    marginTop: theme.spacing[4],
+    marginBottom: theme.spacing[2],
     textAlign: 'center',
+    color: theme.colors.text,
   },
   emptySubtitle: {
-    fontSize: 16,
+    fontSize: theme.fontSizes.md,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: theme.lineHeights.loose,
+    color: theme.colors.textSecondary,
   },
   // Swipe gesture styles
   swipeContainer: {
     position: 'relative',
-    marginBottom: 16,
+    marginBottom: theme.spacing[4],
   },
   swipeAction: {
     position: 'absolute',
@@ -840,45 +794,45 @@ const styles = StyleSheet.create({
   },
   leftAction: {
     left: 0,
-    backgroundColor: '#10B981',
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
+    backgroundColor: theme.colors.success,
+    borderTopLeftRadius: theme.radii.lg,
+    borderBottomLeftRadius: theme.radii.lg,
   },
   rightAction: {
     right: 0,
-    backgroundColor: '#EF4444',
-    borderTopRightRadius: 12,
-    borderBottomRightRadius: 12,
+    backgroundColor: theme.colors.error,
+    borderTopRightRadius: theme.radii.lg,
+    borderBottomRightRadius: theme.radii.lg,
   },
   swipeActionText: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginTop: 4,
+    fontSize: theme.fontSizes.xs,
+    fontWeight: theme.fontWeights.semibold,
+    marginTop: theme.spacing[1],
   },
   // Skeleton loading styles
   skeletonCard: {
-    marginBottom: 16,
+    marginBottom: theme.spacing[4],
   },
   skeletonContent: {
-    gap: 16,
+    gap: theme.spacing[4],
   },
   skeletonHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: theme.spacing[3],
   },
   skeletonAvatar: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: theme.radii.full,
   },
   skeletonInfo: {
     flex: 1,
-    gap: 8,
+    gap: theme.spacing[2],
   },
   skeletonLine: {
     height: 12,
-    borderRadius: 6,
+    borderRadius: theme.radii.sm,
   },
   skeletonTitle: {
     width: '70%',
@@ -889,15 +843,15 @@ const styles = StyleSheet.create({
   skeletonStatus: {
     width: 60,
     height: 24,
-    borderRadius: 12,
+    borderRadius: theme.radii.full,
   },
   skeletonStats: {
     flexDirection: 'row',
-    gap: 16,
+    gap: theme.spacing[4],
   },
   skeletonStat: {
     flex: 1,
     height: 40,
-    borderRadius: 8,
+    borderRadius: theme.radii.md,
   },
 });

@@ -12,10 +12,10 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/lib/use-color-scheme';
 import { Colors } from '@/constants/theme';
 import { HamburgerMenu } from '@/components/ui/hamburger-menu';
-import { useApp } from '@/contexts/app-context';
+import { useApp } from '@/lib/app-context';
 
 const { width } = Dimensions.get('window');
 

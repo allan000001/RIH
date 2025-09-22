@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/lib/use-color-scheme';
 import { Colors } from '@/constants/theme';
 
 interface QRCodeGeneratorProps {
