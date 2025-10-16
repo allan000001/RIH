@@ -40,6 +40,11 @@ const MAPPING = {
   'arrow.down.circle': 'keyboard-arrow-down',
   'eye': 'visibility',
   'eye.slash': 'visibility-off',
+  'star.fill': 'star',
+  'crown.fill': 'emoji-events',
+  'giftcard.fill': 'card-giftcard',
+  'info.circle.fill': 'info',
+  'exclamationmark.triangle.fill': 'warning',
 } as IconMapping;
 
 /**

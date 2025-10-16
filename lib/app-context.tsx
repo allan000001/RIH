@@ -59,6 +59,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Load persisted data on app start
   useEffect(() => {
     loadPersistedData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadPersistedData = async () => {

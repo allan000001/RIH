@@ -15,7 +15,7 @@ import Animated, {
   interpolateColor,
 } from 'react-native-reanimated';
 import { IconSymbol } from './icon-symbol';
-import { Colors, Fonts } from '@/constants/theme';
+import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/lib/use-color-scheme';
 
 export type InputVariant = 'default' | 'outlined' | 'filled';
@@ -68,14 +68,14 @@ export function Input({
   const [isFocused, setIsFocused] = useState(false);
   const focusAnimation = useSharedValue(0);
 
-  const colors = Colors[colorScheme ?? 'light'];
-  const roleColors = role !== 'neutral' ? Colors[role][colorScheme ?? 'light'] : null;
+  const colors = Colors[colorScheme ?? 'light'].colors;
+  const roleColors = role !== 'neutral' ? Colors[role][colorScheme ?? 'light'].colors : null;
 
   const animatedStyle = useAnimatedStyle(() => {
     const borderColor = interpolateColor(
       focusAnimation.value,
       [0, 1],
-      [colors.border, roleColors?.primary || colors.tint]
+      [colors.border, roleColors?.primary || colors.primary]
     );
 
     return {
@@ -114,7 +114,7 @@ export function Input({
         break;
       case 'filled':
         variantStyle = {
-          backgroundColor: roleColors?.surface || colors.surface,
+          backgroundColor: roleColors?.primary ? roleColors.primary + '10' : colors.card,
           borderWidth: 1,
           borderColor: 'transparent',
         };
@@ -156,7 +156,7 @@ export function Input({
             <IconSymbol
               name={leftIcon}
               size={20}
-              color={colors.icon}
+              color={colors.textSecondary}
               style={styles.leftIcon}
             />
           )}
@@ -165,7 +165,7 @@ export function Input({
             value={value}
             onChangeText={onChangeText}
             placeholder={placeholder}
-            placeholderTextColor={colors.neutral}
+            placeholderTextColor={colors.textSecondary}
             style={[getInputStyle(), inputStyle]}
             onFocus={handleFocus}
             onBlur={handleBlur}
@@ -186,7 +186,7 @@ export function Input({
               <IconSymbol
                 name={rightIcon}
                 size={20}
-                color={colors.icon}
+                color={colors.textSecondary}
               />
             </TouchableOpacity>
           )}
@@ -227,7 +227,6 @@ const styles = StyleSheet.create({
 
   input: {
     flex: 1,
-    fontFamily: Fonts.sans,
     paddingVertical: 8,
   },
 
@@ -247,15 +246,13 @@ const styles = StyleSheet.create({
 
   label: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     marginBottom: 6,
-    fontFamily: Fonts.sans,
   },
 
   error: {
     fontSize: 12,
     marginTop: 4,
-    fontFamily: Fonts.sans,
   },
 
   leftIcon: {

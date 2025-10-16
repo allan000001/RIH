@@ -23,7 +23,7 @@ import { useApp } from '@/lib/app-context';
 export default function OnboardingScreen() {
   const router = useRouter();
   const colorScheme = 'dark'; // Force dark mode
-  const colors = Colors.dark;
+  const colors = Colors.dark.colors;
   const { setUserRole } = useApp();
   const [selectedRole, setSelectedRole] = useState<'host' | 'connector' | null>(null);
 
@@ -41,7 +41,7 @@ export default function OnboardingScreen() {
   };
 
   const getRoleColors = (role: 'host' | 'connector') => {
-    return Colors[role].dark;
+    return Colors[role].dark.colors;
   };
 
   return (
@@ -52,7 +52,7 @@ export default function OnboardingScreen() {
           <Text style={[styles.title, { color: colors.text }]}>
             Welcome to AirLink
           </Text>
-          <Text style={[styles.subtitle, { color: colors.tabIconDefault }]}>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Choose how you want to use AirLink
           </Text>
         </Animated.View>
@@ -83,13 +83,13 @@ export default function OnboardingScreen() {
                     Share your internet connection with others
                   </Text>
                   <View style={styles.featureList}>
-                    <Text style={[styles.feature, { color: colors.tabIconDefault }]}>
+                    <Text style={[styles.feature, { color: colors.textSecondary }]}>
                       • Share your mobile data or WiFi
                     </Text>
-                    <Text style={[styles.feature, { color: colors.tabIconDefault }]}>
+                    <Text style={[styles.feature, { color: colors.textSecondary }]}>
                       • Control who connects to you
                     </Text>
-                    <Text style={[styles.feature, { color: colors.tabIconDefault }]}>
+                    <Text style={[styles.feature, { color: colors.textSecondary }]}>
                       • Monitor data usage and bandwidth
                     </Text>
                   </View>
@@ -122,13 +122,13 @@ export default function OnboardingScreen() {
                     Connect to shared internet from hosts
                   </Text>
                   <View style={styles.featureList}>
-                    <Text style={[styles.feature, { color: colors.tabIconDefault }]}>
+                    <Text style={[styles.feature, { color: colors.textSecondary }]}>
                       • Find and connect to nearby hosts
                     </Text>
-                    <Text style={[styles.feature, { color: colors.tabIconDefault }]}>
+                    <Text style={[styles.feature, { color: colors.textSecondary }]}>
                       • Scan QR codes for quick connection
                     </Text>
-                    <Text style={[styles.feature, { color: colors.tabIconDefault }]}>
+                    <Text style={[styles.feature, { color: colors.textSecondary }]}>
                       • Track your data usage
                     </Text>
                   </View>

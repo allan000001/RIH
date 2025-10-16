@@ -26,7 +26,8 @@ interface QRCodeScannerProps {
 
 export function QRCodeScanner({ isVisible, onClose, onScan, title = "Scan QR Code" }: QRCodeScannerProps) {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const theme = Colors[colorScheme ?? 'light'] as typeof Colors.light;
+  const colors = theme.colors;
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
 

@@ -24,12 +24,18 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const theme = useMemo(() => {
     const role = state.userRole || 'host'; // Default to host if no role is set
-    return themes[role][deviceColorScheme];
+    const colorScheme = deviceColorScheme as 'light' | 'dark';
+    
+    if (role === 'host' || role === 'connector') {
+      return themes[role][colorScheme];
+    }
+    // Fallback to host theme if role is invalid
+    return themes.host[colorScheme];
   }, [state.userRole, deviceColorScheme]);
 
   const value = useMemo(() => ({
     theme,
-    colorScheme: deviceColorScheme,
+    colorScheme: deviceColorScheme as 'light' | 'dark',
   }), [theme, deviceColorScheme]);
 
   return (

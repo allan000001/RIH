@@ -45,8 +45,9 @@ export function ConnectionPopup({
   onRetry
 }: ConnectionPopupProps) {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const connectorColors = Colors.connector[colorScheme ?? 'light'];
+  const theme = Colors[colorScheme ?? 'light'];
+  const colors = theme.colors;
+  const connectorColors = Colors.connector[colorScheme ?? 'light'].colors;
   
   const pulseAnimation = useSharedValue(1);
   const progressAnimation = useSharedValue(0);

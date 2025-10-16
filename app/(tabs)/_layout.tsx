@@ -1,20 +1,19 @@
 import { Tabs } from 'expo-router';
-import React, { useState } from 'react';
-import { Switch, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { Switch } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/design-system/icon-symbol';
 import { DockNavigation } from '@/navigation/dock-navigation';
 import { FloatingHamburger } from '@/components/ui/floating-hamburger';
-import { HamburgerMenu } from '@/components/ui/hamburger-menu';
 import { useTheme } from '@/lib/useTheme';
 import { useApp } from '@/lib/app-context';
 
 type TabConfig = {
   name: string;
   title: string;
-  icon: any; // TODO: Export IconName from icon-symbol.tsx
+  icon: string;
   headerTitle: string;
   headerRight?: () => React.ReactNode;
 };
@@ -36,7 +35,6 @@ const ShareSwitch = () => {
 export default function TabLayout() {
   const { state } = useApp();
   const { theme } = useTheme();
-  const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
 
   const tabs: TabConfig[] = [
     { name: 'index', title: 'Home', icon: 'house.fill', headerTitle: 'AirLink' },
@@ -70,7 +68,7 @@ export default function TabLayout() {
             name={tab.name}
             options={{
               title: tab.title,
-              tabBarIcon: ({ color }) => <IconSymbol size={28} name={tab.icon} color={color} />,
+              tabBarIcon: ({ color }) => <IconSymbol size={28} name={tab.icon as any} color={color} />,
               headerShown: true,
               headerTitle: tab.headerTitle,
               headerStyle: {
@@ -79,7 +77,7 @@ export default function TabLayout() {
               headerTintColor: theme.colors.text,
               headerTitleStyle: {
                 fontSize: theme.fontSizes.lg,
-                fontWeight: theme.fontWeights.bold,
+                fontWeight: theme.fontWeights.bold as any,
               },
               headerRight: tab.headerRight,
             }}
@@ -88,10 +86,6 @@ export default function TabLayout() {
       </Tabs>
       
       <FloatingHamburger />
-      <HamburgerMenu
-        isVisible={showHamburgerMenu}
-        onClose={() => setShowHamburgerMenu(false)}
-      />
     </GestureHandlerRootView>
   );
 }

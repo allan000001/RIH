@@ -7,10 +7,10 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { Card, CardContent, CardHeader } from './ui/card';
-import { StatusIndicator, ConnectionStatus } from './ui/status-indicator';
-import { Button } from './ui/button';
-import { IconSymbol } from './ui/icon-symbol';
+import { Card, CardContent, CardHeader } from './design-system/card';
+import { StatusIndicator, ConnectionStatus } from './design-system/status-indicator';
+import { Button } from './design-system/button';
+import { IconSymbol } from './design-system/icon-symbol';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/lib/use-color-scheme';
 
@@ -45,8 +45,8 @@ export function ConnectionCard({
   role = 'host',
 }: ConnectionCardProps) {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const roleColors = Colors[role][colorScheme ?? 'light'];
+  const colors = Colors[colorScheme ?? 'light'].colors;
+  const roleColors = Colors[role][colorScheme ?? 'light'].colors;
 
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(1);
@@ -140,7 +140,7 @@ export function ConnectionCard({
                   <Text style={[styles.deviceName, { color: colors.text }]}>
                     {connection.name}
                   </Text>
-                  <Text style={[styles.deviceType, { color: colors.neutral }]}>
+                  <Text style={[styles.deviceType, { color: colors.textSecondary }]}>
                     {connection.deviceType}
                   </Text>
                 </View>
@@ -158,24 +158,24 @@ export function ConnectionCard({
             {connection.status === 'connected' && (
               <View style={styles.stats}>
                 <View style={styles.stat}>
-                  <IconSymbol name="speedometer" size={16} color={colors.icon} />
-                  <Text style={[styles.statLabel, { color: colors.neutral }]}>Speed</Text>
+                  <IconSymbol name="speedometer" size={16} color={colors.textSecondary} />
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Speed</Text>
                   <Text style={[styles.statValue, { color: colors.text }]}>
                     {formatBandwidth(connection.bandwidth)}
                   </Text>
                 </View>
                 
                 <View style={styles.stat}>
-                  <IconSymbol name="timer" size={16} color={colors.icon} />
-                  <Text style={[styles.statLabel, { color: colors.neutral }]}>Latency</Text>
+                  <IconSymbol name="timer" size={16} color={colors.textSecondary} />
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Latency</Text>
                   <Text style={[styles.statValue, { color: colors.text }]}>
                     {connection.latency ? `${connection.latency}ms` : 'N/A'}
                   </Text>
                 </View>
                 
                 <View style={styles.stat}>
-                  <IconSymbol name="chart.bar" size={16} color={colors.icon} />
-                  <Text style={[styles.statLabel, { color: colors.neutral }]}>Data</Text>
+                  <IconSymbol name="chart.bar" size={16} color={colors.textSecondary} />
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Data</Text>
                   <Text style={[styles.statValue, { color: colors.text }]}>
                     {formatDataUsage(connection.dataUsed)}
                   </Text>
@@ -183,8 +183,8 @@ export function ConnectionCard({
                 
                 {connection.connectedAt && (
                   <View style={styles.stat}>
-                    <IconSymbol name="clock" size={16} color={colors.icon} />
-                    <Text style={[styles.statLabel, { color: colors.neutral }]}>Duration</Text>
+                    <IconSymbol name="clock" size={16} color={colors.textSecondary} />
+                    <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Duration</Text>
                     <Text style={[styles.statValue, { color: colors.text }]}>
                       {formatDuration(connection.connectedAt)}
                     </Text>
@@ -195,7 +195,7 @@ export function ConnectionCard({
 
             {connection.status === 'connecting' && swipeEnabled && (
               <View style={styles.swipeHint}>
-                <Text style={[styles.swipeText, { color: colors.neutral }]}>
+                <Text style={[styles.swipeText, { color: colors.textSecondary }]}>
                   Swipe right to approve, left to reject
                 </Text>
                 <View style={styles.swipeIcons}>

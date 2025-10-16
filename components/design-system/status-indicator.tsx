@@ -83,21 +83,32 @@ export function StatusIndicator({
     switch (status) {
       case 'connected':
         return {
-          color: colors.connected || fallbackColors.connected,
-          icon: 'checkmark.circle.fill' as any,
+          color: colors.success500,
+          icon: 'checkmark.circle.fill' as const,
           text: customText || 'Connected',
-          backgroundColor: (colors.connected || fallbackColors.connected) + '20',
+          backgroundColor: colors.success500 + '20',
         };
       case 'connecting':
         return {
-          color: colors.connecting || fallbackColors.connecting,
-          icon: 'arrow.clockwise' as any,
+          color: colors.warning500,
+          icon: 'arrow.clockwise' as const,
           text: customText || 'Connecting...',
-          backgroundColor: (colors.connecting || fallbackColors.connecting) + '20',
+          backgroundColor: colors.warning500 + '20',
         };
       case 'disconnected':
         return {
-          color: colors.disconnected || fallbackColors.disconnected,
+          color: colors.neutral600,
+          icon: 'xmark.circle.fill' as const,
+          text: customText || 'Disconnected',
+          backgroundColor: colors.neutral600 + '20',
+        };
+      case 'error':
+        return {
+          color: colors.error500,
+          icon: 'exclamationmark.triangle.fill' as const,
+          text: customText || 'Error',
+          backgroundColor: colors.error500 + '20',
+        };
           icon: 'circle' as any,
           text: customText || 'Disconnected',
           backgroundColor: (colors.disconnected || fallbackColors.disconnected) + '20',

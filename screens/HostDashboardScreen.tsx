@@ -123,6 +123,7 @@ export default function HostDashboardScreen() {
     statsAnimations.forEach((anim, index) => {
       anim.value = withDelay(index * 100, withSpring(1, { damping: 15 }));
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

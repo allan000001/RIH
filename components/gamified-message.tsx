@@ -40,7 +40,8 @@ export function GamifiedMessage({
   showConfetti = false
 }: GamifiedMessageProps) {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const theme = Colors[colorScheme ?? 'light'];
+  const colors = theme.colors;
   
   const scaleAnimation = useSharedValue(0);
   const glowAnimation = useSharedValue(0);
@@ -90,7 +91,12 @@ export function GamifiedMessage({
     ],
   }));
 
-  const getTypeConfig = () => {
+  const getTypeConfig = (): {
+    icon: React.ComponentProps<typeof IconSymbol>['name'];
+    color: string;
+    backgroundColor: string;
+    borderColor: string;
+  } => {
     switch (type) {
       case 'success':
         return {
@@ -224,7 +230,7 @@ export function GamifiedMessage({
         {/* Progress indicator for milestones */}
         {type === 'milestone' && (
           <View style={styles.progressContainer}>
-            <View style={[styles.progressTrack, { backgroundColor: colors.surface }]}>
+            <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
               <Animated.View
                 style={[
                   styles.progressFill,

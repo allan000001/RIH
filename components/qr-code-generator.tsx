@@ -20,7 +20,8 @@ export function QRCodeGenerator({
   foregroundColor 
 }: QRCodeGeneratorProps) {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const theme = Colors[colorScheme ?? 'light'];
+  const colors = theme.colors;
 
   return (
     <View style={styles.container}>

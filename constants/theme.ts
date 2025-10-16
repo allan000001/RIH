@@ -76,11 +76,11 @@ const typography = {
     '3xl': 30,
   },
   fontWeights: {
-    light: '300',
-    normal: '400',
-    medium: '500',
-    semibold: '600',
-    bold: '700',
+    light: '300' as const,
+    normal: '400' as const,
+    medium: '500' as const,
+    semibold: '600' as const,
+    bold: '700' as const,
   },
   lineHeights: {
     tight: 1.25,
@@ -140,6 +140,7 @@ const lightTheme = {
     primaryContrast: palette.neutral100,
     secondary: palette.neutral800,
     background: palette.neutral200,
+    surface: palette.neutral300,
     card: palette.neutral100,
     text: palette.neutral900,
     textSecondary: palette.neutral700,
@@ -149,6 +150,10 @@ const lightTheme = {
     error: palette.error500,
     badge: palette.badge500,
     progress: palette.progress500,
+    // Status indicator colors
+    connected: palette.success500,
+    connecting: palette.warning500,
+    disconnected: palette.neutral600,
   },
   ...typography,
   spacing,
@@ -162,10 +167,15 @@ const darkTheme = {
     ...lightTheme.colors,
     primary: palette.host600,
     background: palette.neutral1000,
+    surface: palette.neutral900,
     card: palette.neutral900,
     text: palette.neutral100,
     textSecondary: palette.neutral500,
     border: palette.neutral800,
+    // Status indicator colors (inherited from lightTheme but explicitly listed for type safety)
+    connected: palette.success500,
+    connecting: palette.warning500,
+    disconnected: palette.neutral600,
   },
 };
 
@@ -178,6 +188,9 @@ const themes = {
       colors: {
         ...lightTheme.colors,
         primary: palette.host600,
+        connected: palette.success500,
+        connecting: palette.warning500,
+        disconnected: palette.neutral600,
       },
     },
     dark: {
@@ -185,6 +198,9 @@ const themes = {
       colors: {
         ...darkTheme.colors,
         primary: palette.host600,
+        connected: palette.success500,
+        connecting: palette.warning500,
+        disconnected: palette.neutral600,
       },
     },
   },
@@ -194,6 +210,9 @@ const themes = {
       colors: {
         ...lightTheme.colors,
         primary: palette.connector600,
+        connected: palette.success500,
+        connecting: palette.warning500,
+        disconnected: palette.neutral600,
       },
     },
     dark: {
@@ -201,10 +220,15 @@ const themes = {
       colors: {
         ...darkTheme.colors,
         primary: palette.connector600,
+        connected: palette.success500,
+        connecting: palette.warning500,
+        disconnected: palette.neutral600,
       },
     },
   },
 };
 
 export type Theme = typeof lightTheme;
+export const Colors = themes;
+export const Fonts = typography.fonts;
 export default themes;

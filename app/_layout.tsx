@@ -2,7 +2,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } fro
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { StatusBar } from 'react-native';
+import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { AppProvider, useApp } from '@/lib/app-context';
@@ -27,7 +27,7 @@ function RootLayoutNav() {
       // User has no role selected, redirect to onboarding
       router.replace('/onboarding');
     }
-  }, [state.userRole, segments]);
+  }, [state.userRole, segments, router]);
 
   return (
     <Stack screenOptions={{
@@ -51,7 +51,7 @@ function ThemedRootLayout() {
     return (
         <NavigationThemeProvider value={navigationTheme}>
             <RootLayoutNav />
-            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+            <ExpoStatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         </NavigationThemeProvider>
     )
 }
