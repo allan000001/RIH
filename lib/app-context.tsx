@@ -47,7 +47,7 @@ const STORAGE_KEYS = {
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>({
-    userRole: 'host', // Default to host role to skip onboarding
+    userRole: 'host', // Default to host role
     connections: [],
     currentConnection: undefined,
     hostId: undefined,
@@ -71,7 +71,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       setState(prev => ({
         ...prev,
-        userRole: (userRole as UserRole) || null,
+        userRole: (userRole as UserRole) || 'host', // Always default to host
         hostId: hostId || undefined,
       }));
     } catch (error) {

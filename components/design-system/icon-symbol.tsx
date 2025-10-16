@@ -5,8 +5,8 @@ import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
 import { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 
-type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
-type IconSymbolName = keyof typeof MAPPING;
+type IconMapping = Partial<Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>>;
+export type IconSymbolName = keyof typeof MAPPING;
 
 /**
  * Add your SF Symbols to Material Icons mappings here.
@@ -45,6 +45,24 @@ const MAPPING = {
   'giftcard.fill': 'card-giftcard',
   'info.circle.fill': 'info',
   'exclamationmark.triangle.fill': 'warning',
+  'gearshape.fill': 'settings',
+  'chart.bar.fill': 'bar-chart',
+  'person.2.fill': 'people',
+  'questionmark.circle.fill': 'help',
+  'xmark': 'close',
+  'wifi': 'wifi',
+  'sparkles': 'auto-awesome',
+  'share': 'share',
+  'bolt.fill': 'bolt',
+  'gauge.high': 'speed',
+  'trophy.fill': 'emoji-events',
+  'flame.fill': 'local-fire-department',
+  'person.badge.plus': 'person-add',
+  'arrow.clockwise': 'refresh',
+  'xmark.circle.fill': 'cancel',
+  'trash.circle.fill': 'delete',
+  'heart.fill': 'favorite',
+  'heart': 'favorite-border',
 } as IconMapping;
 
 /**

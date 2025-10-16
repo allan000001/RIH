@@ -21,7 +21,8 @@ const { width } = Dimensions.get('window');
 
 export function FloatingHamburger() {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const theme = Colors[colorScheme ?? 'light'];
+  const colors = theme.colors;
   const { state } = useApp();
   const [showMenu, setShowMenu] = useState(false);
   
@@ -46,7 +47,7 @@ export function FloatingHamburger() {
     setShowMenu(!showMenu);
   };
 
-  const roleColor = state.userRole === 'host' ? '#10B981' : '#3B82F6';
+  const brandColor = '#10B981';
 
   return (
     <>
@@ -55,8 +56,8 @@ export function FloatingHamburger() {
           style={[
             styles.button,
             {
-              backgroundColor: roleColor,
-              shadowColor: roleColor,
+              backgroundColor: brandColor,
+              shadowColor: brandColor,
             }
           ]}
           onPress={handlePress}

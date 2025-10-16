@@ -36,8 +36,10 @@ export function Card({
   const colorScheme = useColorScheme();
   const scale = useSharedValue(1);
 
-  const colors = Colors[colorScheme ?? 'light'];
-  const roleColors = role !== 'neutral' ? Colors[role][colorScheme ?? 'light'] : null;
+  const theme = Colors[colorScheme ?? 'light'];
+  const colors = theme.colors;
+  const roleTheme = role !== 'neutral' ? Colors[role][colorScheme ?? 'light'] : null;
+  const roleColors = roleTheme?.colors;
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

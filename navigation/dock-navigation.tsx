@@ -45,7 +45,7 @@ function DockTab({ title, icon, isActive, onPress, color }: DockTabProps) {
         <IconSymbol
           name={icon}
           size={28}
-          color={isActive ? color : theme.colors.textSecondary}
+          color={isActive ? color : (theme?.colors?.textSecondary || '#64748B')}
         />
       </Animated.View>
     </TouchableOpacity>
@@ -59,7 +59,7 @@ interface DockNavigationProps {
 }
 
 export function DockNavigation({ state, descriptors, navigation }: DockNavigationProps) {
-  const { theme } = useTheme();
+  const { theme, colorScheme } = useTheme();
   const styles = getStyles(theme);
   const insets = useSafeAreaInsets();
   const { state: appState } = useApp();
@@ -78,7 +78,7 @@ export function DockNavigation({ state, descriptors, navigation }: DockNavigatio
 
   return (
     <View style={[styles.container, { bottom: insets.bottom }]}>
-      <BlurView intensity={90} tint={theme.colors.background === '#fff' ? 'light' : 'dark'} style={styles.blurView}>
+      <BlurView intensity={90} tint={colorScheme === 'dark' ? 'dark' : 'light'} style={styles.blurView}>
         <Animated.View style={[styles.activeIndicator, { width: tabWidth }, indicatorStyle]} />
         {filteredRoutes.map((route: any) => {
           const { options } = descriptors[route.key];
@@ -103,7 +103,7 @@ export function DockNavigation({ state, descriptors, navigation }: DockNavigatio
               icon={options.tabBarIcon({ color: '' }).props.name} // A bit of a hack to get the icon name
               isActive={isFocused}
               onPress={onPress}
-              color={theme.colors.primary}
+              color={theme?.colors?.primary || '#22C55E'}
             />
           );
         })}
@@ -130,8 +130,8 @@ const getStyles = (theme: any) => StyleSheet.create({
   activeIndicator: {
     position: 'absolute',
     height: '100%',
-    backgroundColor: theme.colors.primary + '20',
-    borderRadius: theme.radii.full,
+    backgroundColor: (theme?.colors?.primary || '#22C55E') + '20',
+    borderRadius: theme?.radii?.full || 9999,
   },
   tabContainer: {
     flex: 1,

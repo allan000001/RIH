@@ -28,16 +28,11 @@ import { useApp } from '@/lib/app-context';
 export default function SettingsScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const theme = Colors[colorScheme ?? 'light'];
+  const colors = theme.colors;
   const { state, setUserRole } = useApp();
-  const roleColors = state.userRole ? Colors[state.userRole][colorScheme ?? 'light'] : { primary: colors.primary };
-  
-  // Ensure colors object has required properties
-  const safeColors = {
-    ...colors,
-    text: colors.text || '#000000',
-    tabIconDefault: colors.tabIconDefault || '#666666',
-  };
+  const roleTheme = state.userRole ? Colors[state.userRole][colorScheme ?? 'light'] : null;
+  const roleColors = roleTheme?.colors || colors;
 
   const [userName, setUserName] = useState('AirLink User');
   const [deviceName, setDeviceName] = useState('My Device');
@@ -46,42 +41,7 @@ export default function SettingsScreen() {
   const [notifications, setNotifications] = useState(true);
   const [hapticFeedback, setHapticFeedback] = useState(true);
 
-  const handleRoleSwitch = () => {
-    Alert.alert(
-      'Switch Role',
-      `Switch from ${state.userRole} to ${state.userRole === 'host' ? 'connector' : 'host'}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Switch',
-          onPress: () => {
-            const newRole = state.userRole === 'host' ? 'connector' : 'host';
-            setUserRole(newRole);
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            router.back();
-          },
-        },
-      ]
-    );
-  };
 
-  const handleResetRole = () => {
-    Alert.alert(
-      'Reset Role',
-      'This will reset your role selection and return you to onboarding.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: () => {
-            setUserRole(null);
-            router.replace('/onboarding');
-          },
-        },
-      ]
-    );
-  };
 
   const SettingRow = ({ 
     title, 
@@ -105,11 +65,11 @@ export default function SettingsScreen() {
     >
       <View style={styles.settingContent}>
         <View style={styles.settingText}>
-          <Text style={[styles.settingTitle, { color: safeColors.text }]}>
+          <Text style={[styles.settingTitle, { color: colors.text }]}>
             {title}
           </Text>
           {subtitle && (
-            <Text style={[styles.settingSubtitle, { color: colors.tabIconDefault }]}>
+            <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
               {subtitle}
             </Text>
           )}
@@ -118,12 +78,12 @@ export default function SettingsScreen() {
           {children || (
             <>
               {value && (
-                <Text style={[styles.settingValueText, { color: colors.tabIconDefault }]}>
+                <Text style={[styles.settingValueText, { color: colors.textSecondary }]}>
                   {value}
                 </Text>
               )}
               {showChevron && onPress && (
-                <IconSymbol name="chevron.right" size={16} color={colors.tabIconDefault} />
+                <IconSymbol name="chevron.right" size={16} color={colors.textSecondary} />
               )}
             </>
           )}
@@ -140,9 +100,9 @@ export default function SettingsScreen() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <IconSymbol name="chevron.left" size={24} color={safeColors.text} />
+          <IconSymbol name="chevron.left" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.title, { color: safeColors.text }]}>
+        <Text style={[styles.title, { color: colors.text }]}>
           Settings
         </Text>
         <View style={styles.placeholder} />
@@ -154,20 +114,20 @@ export default function SettingsScreen() {
           <Card variant="elevated">
             <CardHeader>
               <View style={styles.profileHeader}>
-                <View style={[styles.avatar, { backgroundColor: roleColors.primary }]}>
+                <View style={[styles.avatar, { backgroundColor: '#10B981' }]}>
                   <Text style={styles.avatarText}>
-                    {state.userRole === 'host' ? '📡' : '📱'}
+                    📡
                   </Text>
                 </View>
                 <View style={styles.profileInfo}>
-                  <Text style={[styles.profileName, { color: safeColors.text }]}>
+                  <Text style={[styles.profileName, { color: colors.text }]}>
                     {userName}
                   </Text>
-                  <Text style={[styles.profileRole, { color: roleColors.primary }]}>
-                    {state.userRole ? state.userRole.charAt(0).toUpperCase() + state.userRole.slice(1) : 'No Role'}
+                  <Text style={[styles.profileRole, { color: '#10B981' }]}>
+                    AirLink User
                   </Text>
                   {state.hostId && (
-                    <Text style={[styles.profileId, { color: colors.tabIconDefault }]}>
+                    <Text style={[styles.profileId, { color: colors.textSecondary }]}>
                       ID: {state.hostId}
                     </Text>
                   )}
@@ -191,37 +151,11 @@ export default function SettingsScreen() {
           </Card>
         </Animated.View>
 
-        {/* Role Management */}
-        <Animated.View entering={FadeInDown.delay(300)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: safeColors.text }]}>
-            Role Management
-          </Text>
-          <Card variant="default">
-            <CardContent style={styles.cardContent}>
-              <SettingRow
-                title="Switch Role"
-                subtitle={`Currently: ${state.userRole}`}
-                onPress={handleRoleSwitch}
-              />
-              <View style={styles.divider} />
-              <SettingRow
-                title="Reset Role Selection"
-                subtitle="Return to onboarding"
-                onPress={handleResetRole}
-                showChevron={false}
-              >
-                <IconSymbol name="arrow.clockwise" size={16} color={colors.error} />
-              </SettingRow>
-            </CardContent>
-          </Card>
-        </Animated.View>
-
         {/* Connection Settings */}
-        {state.userRole === 'host' && (
-          <Animated.View entering={FadeInDown.delay(400)} style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: safeColors.text }]}>
-              Host Settings
-            </Text>
+        <Animated.View entering={FadeInDown.delay(300)} style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            Connection Settings
+          </Text>
             <Card variant="default">
               <CardContent style={styles.cardContent}>
                 <SettingRow
@@ -233,7 +167,7 @@ export default function SettingsScreen() {
                     value={autoAccept}
                     onValueChange={setAutoAccept}
                     trackColor={{ false: colors.border, true: roleColors.primary }}
-                    thumbColor={autoAccept ? 'white' : colors.tabIconDefault}
+                    thumbColor={autoAccept ? 'white' : colors.textSecondary}
                   />
                 </SettingRow>
                 <View style={styles.divider} />
@@ -252,12 +186,11 @@ export default function SettingsScreen() {
                 </SettingRow>
               </CardContent>
             </Card>
-          </Animated.View>
-        )}
+        </Animated.View>
 
         {/* App Settings */}
         <Animated.View entering={FadeInDown.delay(500)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: safeColors.text }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
             App Settings
           </Text>
           <Card variant="default">
@@ -271,7 +204,7 @@ export default function SettingsScreen() {
                   value={notifications}
                   onValueChange={setNotifications}
                   trackColor={{ false: colors.border, true: roleColors.primary }}
-                  thumbColor={notifications ? 'white' : colors.tabIconDefault}
+                  thumbColor={notifications ? 'white' : colors.textSecondary}
                 />
               </SettingRow>
               <View style={styles.divider} />
@@ -284,7 +217,7 @@ export default function SettingsScreen() {
                   value={hapticFeedback}
                   onValueChange={setHapticFeedback}
                   trackColor={{ false: colors.border, true: roleColors.primary }}
-                  thumbColor={hapticFeedback ? 'white' : colors.tabIconDefault}
+                  thumbColor={hapticFeedback ? 'white' : colors.textSecondary}
                 />
               </SettingRow>
               <View style={styles.divider} />
@@ -300,7 +233,7 @@ export default function SettingsScreen() {
 
         {/* About Section */}
         <Animated.View entering={FadeInDown.delay(600)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: safeColors.text }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
             About
           </Text>
           <Card variant="default">

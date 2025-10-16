@@ -139,12 +139,7 @@ const BadgeCard: React.FC<BadgeCardProps> = ({ badge, index }) => {
           />
         </View>
 
-        <Text style={[
-          styles.badgeName,
-          { 
-            color: isUnlocked ? theme.colors.text : theme.colors.textSecondary,
-          }
-        ]}>
+        <Text style={styles.badgeName}>
           {badge.name}
         </Text>
 
@@ -228,7 +223,9 @@ export const BadgeSystem: React.FC<BadgeSystemProps> = ({ badges }) => {
 
 const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
-    padding: theme.spacing[5],
+    width: '100%',
+    paddingHorizontal: theme.spacing[5],
+    paddingVertical: theme.spacing[4],
   },
   header: {
     marginBottom: theme.spacing[6],
@@ -248,11 +245,11 @@ const getStyles = (theme: Theme) => StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: theme.spacing[4],
   },
   badgeCard: {
     width: '48%',
     position: 'relative',
+    marginBottom: theme.spacing[4],
   },
   glowEffect: {
     position: 'absolute',
@@ -273,7 +270,8 @@ const getStyles = (theme: Theme) => StyleSheet.create({
     padding: theme.spacing[4],
     borderRadius: theme.radii.lg,
     alignItems: 'center',
-    minHeight: 180,
+    minHeight: 200,
+    justifyContent: 'space-between',
     backgroundColor: theme.colors.card,
   },
   badgeIcon: {
@@ -289,6 +287,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
     fontWeight: theme.fontWeights.semibold,
     textAlign: 'center',
     marginBottom: theme.spacing[2],
+    color: theme.colors.text,
   },
   badgeDescription: {
     fontSize: theme.fontSizes.xs,

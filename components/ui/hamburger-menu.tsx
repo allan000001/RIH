@@ -21,14 +21,14 @@ import Animated, {
 import * as Haptics from 'expo-haptics';
 import { useColorScheme } from '@/lib/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { IconSymbol } from '@/components/design-system/icon-symbol';
+import { IconSymbol, type IconSymbolName } from '@/components/design-system/icon-symbol';
 import { useRouter } from 'expo-router';
 import { useApp } from '@/lib/app-context';
 
 const { width, height } = Dimensions.get('window');
 
 interface MenuItemProps {
-  icon: string;
+  icon: IconSymbolName;
   title: string;
   subtitle?: string;
   onPress: () => void;
@@ -37,7 +37,8 @@ interface MenuItemProps {
 
 function MenuItem({ icon, title, subtitle, onPress, color }: MenuItemProps) {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const theme = Colors[colorScheme ?? 'light'];
+  const colors = theme.colors;
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -90,11 +91,12 @@ interface HamburgerMenuProps {
 
 export function HamburgerMenu({ isVisible, onClose }: HamburgerMenuProps) {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const theme = Colors[colorScheme ?? 'light'];
+  const colors = theme.colors;
   const router = useRouter();
   const { state } = useApp();
 
-  const menuItems = [
+  const menuItems: Array<{ icon: IconSymbolName; title: string; subtitle: string; color: string; onPress: () => void }> = [
     {
       icon: 'gearshape.fill',
       title: 'Settings',
@@ -173,7 +175,7 @@ export function HamburgerMenu({ isVisible, onClose }: HamburgerMenuProps) {
           {/* Header */}
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
             <View style={styles.headerContent}>
-              <View style={[styles.appIcon, { backgroundColor: state.userRole === 'host' ? '#10B981' : '#3B82F6' }]}>
+              <View style={[styles.appIcon, { backgroundColor: '#10B981' }]}>
                 <IconSymbol
                   name="wifi"
                   size={24}
@@ -185,7 +187,7 @@ export function HamburgerMenu({ isVisible, onClose }: HamburgerMenuProps) {
                   AirLink
                 </Text>
                 <Text style={[styles.userRole, { color: colors.textSecondary }]}>
-                  {state.userRole === 'host' ? 'Host Mode' : 'Connector Mode'}
+                  Connect & Share
                 </Text>
               </View>
             </View>

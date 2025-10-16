@@ -1,16 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  withSequence,
   Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
 } from 'react-native-reanimated';
 import { IconSymbol } from './icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/lib/use-color-scheme';
+import { useTheme } from '@/lib/useTheme';
 
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected' | 'error';
 export type StatusSize = 'small' | 'medium' | 'large';
@@ -32,8 +31,8 @@ export function StatusIndicator({
   style,
   animated = true,
 }: StatusIndicatorProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const { theme } = useTheme();
+  const colors = theme?.colors;
   
   // Fallback colors if theme colors are undefined
   const fallbackColors = {
@@ -83,42 +82,31 @@ export function StatusIndicator({
     switch (status) {
       case 'connected':
         return {
-          color: colors.success500,
+          color: colors?.connected || fallbackColors.connected,
           icon: 'checkmark.circle.fill' as const,
           text: customText || 'Connected',
-          backgroundColor: colors.success500 + '20',
+          backgroundColor: (colors?.connected || fallbackColors.connected) + '20',
         };
       case 'connecting':
         return {
-          color: colors.warning500,
+          color: colors?.connecting || fallbackColors.connecting,
           icon: 'arrow.clockwise' as const,
           text: customText || 'Connecting...',
-          backgroundColor: colors.warning500 + '20',
+          backgroundColor: (colors?.connecting || fallbackColors.connecting) + '20',
         };
       case 'disconnected':
         return {
-          color: colors.neutral600,
+          color: colors?.disconnected || fallbackColors.disconnected,
           icon: 'xmark.circle.fill' as const,
           text: customText || 'Disconnected',
-          backgroundColor: colors.neutral600 + '20',
+          backgroundColor: (colors?.disconnected || fallbackColors.disconnected) + '20',
         };
       case 'error':
         return {
-          color: colors.error500,
+          color: colors?.error || fallbackColors.error,
           icon: 'exclamationmark.triangle.fill' as const,
           text: customText || 'Error',
-          backgroundColor: colors.error500 + '20',
-        };
-          icon: 'circle' as any,
-          text: customText || 'Disconnected',
-          backgroundColor: (colors.disconnected || fallbackColors.disconnected) + '20',
-        };
-      case 'error':
-        return {
-          color: colors.error || fallbackColors.error,
-          icon: 'exclamationmark.circle.fill' as any,
-          text: customText || 'Connection Error',
-          backgroundColor: (colors.error || fallbackColors.error) + '20',
+          backgroundColor: (colors?.error || fallbackColors.error) + '20',
         };
     }
   };

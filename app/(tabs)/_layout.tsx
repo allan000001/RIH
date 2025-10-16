@@ -37,23 +37,24 @@ export default function TabLayout() {
   const { theme } = useTheme();
 
   const tabs: TabConfig[] = [
-    { name: 'index', title: 'Home', icon: 'house.fill', headerTitle: 'AirLink' },
+    { 
+      name: 'index', 
+      title: 'Home', 
+      icon: 'house.fill', 
+      headerTitle: 'AirLink',
+      headerRight: () => <ShareSwitch />
+    },
     {
       name: 'connect',
-      title: state.userRole === 'host' ? 'Connections' : 'Connect',
-      icon: state.userRole === 'host' ? 'person.2.fill' : 'wifi',
-      headerTitle: state.userRole === 'host' ? 'Connections' : 'Connect',
+      title: 'Connect',
+      icon: 'wifi',
+      headerTitle: 'Connect & Share',
     },
-    { name: 'notifications', title: 'Notifications', icon: 'bell.fill', headerTitle: 'Activity' },
+    { name: 'notifications', title: 'Activity', icon: 'bell.fill', headerTitle: 'Activity' },
   ];
 
-  if (state.userRole === 'host') {
-    tabs[0].headerTitle = 'AirLink Host';
-    tabs[0].headerRight = () => <ShareSwitch />;
-  }
-
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme?.colors?.background || '#F8FAFC' }}>
       <Tabs
         tabBar={(props) => <DockNavigation {...props} />}
         screenOptions={{

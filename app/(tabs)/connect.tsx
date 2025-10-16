@@ -90,16 +90,25 @@ interface Connection {
 type FilterType = 'all' | 'connected' | 'pending' | 'disconnected';
 type SortType = 'name' | 'dataUsed' | 'connectedAt' | 'trustLevel';
 
+// --- Helper Functions ---
+const formatTimeAgo = (date?: Date) => {
+  if (!date) return 'Never';
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 0) return `${diffDays}d ago`;
+  if (diffHours > 0) return `${diffHours}h ago`;
+  if (diffMins > 0) return `${diffMins}m ago`;
+  return 'Just now';
+};
+
 // --- Main Component ---
 export default function ConnectScreen() {
-  const { state } = useApp();
-  const { userRole } = state;
-
-  if (userRole === 'host') {
-    return <HostConnectionsScreen />;
-  }
-
-  return <ConnectorConnectScreen />;
+  // Always show host connections screen as it has both connect and manage features
+  return <HostConnectionsScreen />;
 }
 
 // --- Connector's Connect Screen ---
@@ -835,8 +844,8 @@ function HostConnectionsScreen() {
         <View style={styles.swipeContainer}>
             {connection.status === 'pending' && (
             <Animated.View style={[styles.swipeAction, styles.leftAction, leftActionStyle]}>
-                <IconSymbol name="checkmark.circle.fill" size={32} color={theme.colors.primaryContrast} />
-                <Text style={[styles.swipeActionText, { color: theme.colors.primaryContrast }]}>Approve</Text>
+                <IconSymbol name="checkmark.circle.fill" size={32} color={theme?.colors?.primaryContrast || '#FFFFFF'} />
+                <Text style={[styles.swipeActionText, { color: theme?.colors?.primaryContrast || '#FFFFFF' }]}>Approve</Text>
             </Animated.View>
             )}
 
@@ -844,9 +853,9 @@ function HostConnectionsScreen() {
             <IconSymbol
                 name={connection.status === 'connected' ? "xmark.circle.fill" : "trash.circle.fill"}
                 size={32}
-                color={theme.colors.primaryContrast}
+                color={theme?.colors?.primaryContrast || '#FFFFFF'}
             />
-            <Text style={[styles.swipeActionText, { color: theme.colors.primaryContrast }]}>
+            <Text style={[styles.swipeActionText, { color: theme?.colors?.primaryContrast || '#FFFFFF' }]}>
                 {connection.status === 'connected' ? 'Disconnect' : 'Reject'}
             </Text>
             </Animated.View>
@@ -858,7 +867,7 @@ function HostConnectionsScreen() {
                 style={[
                     styles.connectionCard,
                     selectedConnections.includes(connection.id) && {
-                    borderColor: theme.colors.primary,
+                    borderColor: theme?.colors?.primary || '#22C55E',
                     borderWidth: 2,
                     },
                 ]}

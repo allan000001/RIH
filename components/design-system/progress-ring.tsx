@@ -34,8 +34,10 @@ export function ProgressRing({
   role = 'neutral',
 }: ProgressRingProps) {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const roleColors = role !== 'neutral' ? Colors[role][colorScheme ?? 'light'] : null;
+  const theme = Colors[colorScheme ?? 'light'];
+  const colors = theme.colors;
+  const roleTheme = role !== 'neutral' ? Colors[role][colorScheme ?? 'light'] : null;
+  const roleColors = roleTheme?.colors;
 
   const animatedProgress = useSharedValue(0);
   const radius = (size - strokeWidth) / 2;
